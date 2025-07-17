@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "618768766009",
+    "project_id": "ophth-board",
+    "storage_bucket": "ophth-board.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:618768766009:android:d488fb0fca6f04269ca9e8",
+        "android_client_info": {
+          "package_name": "com.example.ophth_board"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCltfi9jxN-PmWXDJ9cz6tXyW-5QUGLh-Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:618768766009:android:951ced1b376373519ca9e8",
+        "android_client_info": {
+          "package_name": "me.hussainsk.ophthboard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCltfi9jxN-PmWXDJ9cz6tXyW-5QUGLh-Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
