@@ -8,12 +8,18 @@ class ResidentEvaluationFormView extends ConsumerStatefulWidget {
   final String rotationId;
   final String supervisorId;
   final String residentId;
+  final String residentName;
+  final String supervisorName;
+  final String rotationName;
 
   const ResidentEvaluationFormView({
     super.key,
     required this.rotationId,
     required this.supervisorId,
     required this.residentId,
+    required this.residentName,
+    required this.supervisorName,
+    required this.rotationName,
   });
 
   @override
@@ -45,6 +51,10 @@ class _ResidentEvaluationFormViewState
     notifier.updateEvaluationField(widget.residentId, 'residentId');
     notifier.updateEvaluationField(widget.rotationId, 'rotationId');
     notifier.updateEvaluationField(widget.supervisorId, 'supervisorId');
+    notifier.updateEvaluationField(widget.residentName, 'residentName');
+    notifier.updateEvaluationField(widget.rotationName, 'rotationName');
+    notifier.updateEvaluationField(widget.supervisorName, 'supervisorName');
+    
   }
 
   @override
@@ -55,11 +65,13 @@ class _ResidentEvaluationFormViewState
 
   int get _totalPages {
     final evaluation = ref.read(residentEvaluationProvider).currentEvaluation;
-    return evaluation?.categories.length ??
-        0 + 1; // +1 for overall assessment page
+    if (evaluation == null) return 1;
+    return evaluation.categories.length +
+        1; // Fixed: +1 for overall assessment page
   }
 
-  bool get _isLastPage => _currentPage == _totalPages - 1;
+  bool get _isLastPage =>
+      _currentPage == _totalPages - 1; // Fixed: -1 for zero-based index
 
   void _nextPage() {
     if (_isLastPage) {
@@ -159,7 +171,7 @@ class _ResidentEvaluationFormViewState
       body: Column(
         children: [
           _buildProgressHeader(),
-          _buildResidentCard(),
+          _buildResidentCard(widget.residentName),
           Expanded(
             child: PageView(
               controller: _pageController,
@@ -213,7 +225,7 @@ class _ResidentEvaluationFormViewState
     );
   }
 
-  Widget _buildResidentCard() {
+  Widget _buildResidentCard(String residentName) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
@@ -244,9 +256,9 @@ class _ResidentEvaluationFormViewState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Sarah Mitchell',
-                  style: TextStyle(
+                Text(
+                  residentName,
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF2C3E50),
@@ -254,7 +266,7 @@ class _ResidentEvaluationFormViewState
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Mid-Rotation Evaluation',
+                  'Rotation Evaluation',
                   style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
               ],
@@ -391,11 +403,11 @@ class _CategoryPage extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Evaluation Criteria',
-                  style: TextStyle(
+                  category.title,
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey[800],
+                    color: Color(0xFF2C3E50),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -568,56 +580,179 @@ class _CriterionCard extends StatelessWidget {
 class _OverallAndCommentsPage extends ConsumerWidget {
   const _OverallAndCommentsPage();
 
+  // Auto-calculate overall competence based on category averages
+  EvaluationScore _calculateOverallCompetence(evaluation) {
+    if (evaluation.categories.isEmpty) return EvaluationScore.notApplicable;
+
+    List<double> categoryAverages = [];
+
+    for (final category in evaluation.categories) {
+      final validScores = category.criteria
+          .where(
+            (c) => c.score != null && c.score != EvaluationScore.notApplicable,
+          )
+          .map((c) => c.score!.value.toDouble())
+          .toList();
+
+      if (validScores.isNotEmpty) {
+        final average =
+            validScores.reduce((a, b) => a + b) / validScores.length;
+        categoryAverages.add(average);
+      }
+    }
+
+    if (categoryAverages.isEmpty) return EvaluationScore.notApplicable;
+
+    final overallAverage =
+        categoryAverages.reduce((a, b) => a + b) / categoryAverages.length;
+    final roundedScore = overallAverage.round();
+
+    // Convert back to EvaluationScore
+    switch (roundedScore) {
+      case 1:
+        return EvaluationScore.unsatisfactory;
+      case 2:
+        return EvaluationScore.needsImprovement;
+      case 3:
+        return EvaluationScore.meetsExpectations;
+      case 4:
+        return EvaluationScore.exceedsExpectations;
+      case 5:
+        return EvaluationScore.outstanding;
+      default:
+        return EvaluationScore.meetsExpectations;
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final evaluationState = ref.watch(residentEvaluationProvider);
     final evaluation = evaluationState.currentEvaluation!;
     final notifier = ref.read(residentEvaluationProvider.notifier);
 
+    // Auto-calculate overall competence
+    final calculatedOverallCompetence = _calculateOverallCompetence(evaluation);
+
+    // Update the evaluation if the calculated score is different from current
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (evaluation.overallCompetence != calculatedOverallCompetence) {
+        notifier.updateEvaluationField(
+          calculatedOverallCompetence,
+          'overallCompetence',
+        );
+      }
+    });
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Overall Assessment',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 24),
-          DropdownButtonFormField<EvaluationScore>(
-            value: evaluation.overallCompetence == EvaluationScore.notApplicable
-                ? null
-                : evaluation.overallCompetence,
-            decoration: const InputDecoration(
-              labelText: 'Overall Competence',
-              border: OutlineInputBorder(),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            items: EvaluationScore.values
-                .where((score) => score != EvaluationScore.notApplicable)
-                .map(
-                  (score) => DropdownMenuItem(
-                    value: score,
-                    child: Text(score.description),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Overall Assessment',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2C3E50),
                   ),
-                )
-                .toList(),
-            onChanged: (value) {
-              if (value != null) {
-                notifier.updateEvaluationField(value, 'overallCompetence');
-              }
-            },
+                ),
+                
+                const SizedBox(height: 8),
+                Text(
+                  'Auto-calculated based on category averages',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 24),
-          TextFormField(
-            initialValue: evaluation.additionalComments,
-            decoration: const InputDecoration(
-              labelText: 'Additional Comments',
-              border: OutlineInputBorder(),
-              hintText: 'Provide any additional feedback or observations...',
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            maxLines: 5,
-            onChanged: (value) =>
-                notifier.updateEvaluationField(value, 'additionalComments'),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Overall Competence',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF2C3E50),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2C3E50),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    calculatedOverallCompetence.description,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: TextFormField(
+              initialValue: evaluation.additionalComments,
+              decoration: const InputDecoration(
+                labelText: 'Additional Comments',
+                border: OutlineInputBorder(),
+                hintText: 'Provide any additional feedback or observations...',
+              ),
+              maxLines: 5,
+              onChanged: (value) =>
+                  notifier.updateEvaluationField(value, 'additionalComments'),
+            ),
           ),
           if (evaluationState.errorMessage != null) ...[
             const SizedBox(height: 16),

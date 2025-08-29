@@ -9,7 +9,7 @@ enum EvaluationScore {
   meetsExpectations(3, 'Meets expectations'),
   exceedsExpectations(4, 'Exceeds expectations'),
   outstanding(5, 'Outstanding'),
-  notApplicable(-1, 'N/A');
+  notApplicable(6, 'N/A');
 
   const EvaluationScore(this.value, this.description);
   final int value;

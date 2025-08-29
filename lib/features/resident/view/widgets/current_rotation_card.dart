@@ -7,11 +7,13 @@ import '../../../rotation/view/rotation_screen.dart';
 class CurrentRotationCard extends StatelessWidget {
   final Rotation rotation;
   final String residentId;
+  final String residentName;
 
   const CurrentRotationCard({
     super.key,
     required this.rotation,
     required this.residentId,
+    required this.residentName,
   });
 
   @override
@@ -106,6 +108,9 @@ class CurrentRotationCard extends StatelessWidget {
                                 supervisorId:
                                     rotation.assignedSupervisors.keys.first,
                                 residentId: residentId,
+                                residentName: residentName,
+                                supervisorName: rotation.assignedSupervisors.keys.first,
+                                rotationName: rotation.title,
                               ),
                             ),
                           );

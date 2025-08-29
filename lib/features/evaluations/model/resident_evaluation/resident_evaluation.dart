@@ -14,6 +14,9 @@ class ResidentEvaluation {
   String residentId;
   TrainingLevel trainingLevel;
   TrainingType trainingType;
+  String supervisorName;
+  String residentName;
+  String rotationTitle;
 
   // Evaluation categories
   List<EvaluationCategory> categories;
@@ -27,14 +30,14 @@ class ResidentEvaluation {
   String? residentSignature;
   DateTime? residentSignatureDate;
   String? supervisorSignature;
-  DateTime? supervisorSignatureDate;
+  DateTime? supervisorApproveDate;
   bool isCompleted;
 
   ResidentEvaluation({
     this.id,
-    this.rotationId = '',
-    this.supervisorId = '',
-    this.residentId = '',
+    required this.rotationId,
+    required this.supervisorId,
+    required this.residentId,
     this.trainingLevel = TrainingLevel.r1,
     this.trainingType = TrainingType.residency,
     List<EvaluationCategory>? categories,
@@ -44,15 +47,19 @@ class ResidentEvaluation {
     this.residentSignature,
     this.residentSignatureDate,
     this.supervisorSignature,
-    this.supervisorSignatureDate,
+    this.supervisorApproveDate,
     this.isCompleted = false,
+    required this.supervisorName,
+    required this.residentName,
+    required this.rotationTitle,
   }) : categories = categories ?? _getDefaultCategories();
 
-  // Calculate overall average score
-  double get overallAverageScore {
-    if (categories.isEmpty) return 0.0;
+  // Calculate overall competence score
+  int getOverallCompetence() {
+    if (categories.isEmpty) return 0;
     final averages = categories.map((c) => c.averageScore).toList();
-    return averages.reduce((a, b) => a + b) / averages.length;
+    final result = averages.reduce((a, b) => a + b) / averages.length;
+    return result.round();
   }
 
   // Check if form is valid for submission
@@ -90,13 +97,19 @@ class ResidentEvaluation {
     'residentSignature': residentSignature,
     'residentSignatureDate': residentSignatureDate?.toIso8601String(),
     'supervisorSignature': supervisorSignature,
-    'supervisorSignatureDate': supervisorSignatureDate?.toIso8601String(),
+    'supervisorApproveDate': supervisorApproveDate?.toIso8601String(),
     'isCompleted': isCompleted,
+    'supervisorName': supervisorName,
+    'residentName': residentName,
+    'rotationTitle': rotationTitle,
   };
 
   factory ResidentEvaluation.fromJson(Map<String, dynamic> json) {
     return ResidentEvaluation(
       id: json['id'],
+      supervisorName: json['supervisorName'] ?? '',
+      residentName: json['residentName'] ?? '',
+      rotationTitle: json['rotationTitle'] ?? '',
       rotationId: json['rotationId'] ?? '',
       supervisorId: json['supervisorId'] ?? '',
       residentId: json['residentId'] ?? '',
@@ -118,8 +131,8 @@ class ResidentEvaluation {
           ? DateTime.parse(json['residentSignatureDate'])
           : null,
       supervisorSignature: json['supervisorSignature'],
-      supervisorSignatureDate: json['supervisorSignatureDate'] != null
-          ? DateTime.parse(json['supervisorSignatureDate'])
+      supervisorApproveDate: json['supervisorApproveDate'] != null
+          ? DateTime.parse(json['supervisorApproveDate'])
           : null,
       isCompleted: json['isCompleted'] ?? false,
     );
@@ -133,6 +146,9 @@ class ResidentEvaluation {
   // Create a copy of the form
   ResidentEvaluation copyWith({
     String? id,
+    String? supervisorName,
+    String? residentName,
+    String? rotationTitle,
     String? program,
     String? rotationId,
     String? supervisorId,
@@ -147,11 +163,14 @@ class ResidentEvaluation {
     String? residentSignature,
     DateTime? residentSignatureDate,
     String? supervisorSignature,
-    DateTime? supervisorSignatureDate,
+    DateTime? supervisorApproveDate,
     bool? isCompleted,
   }) {
     return ResidentEvaluation(
       id: id ?? this.id,
+      supervisorName: supervisorName ?? this.supervisorName,
+      residentName: residentName ?? this.residentName,
+      rotationTitle: rotationTitle ?? this.rotationTitle,
       rotationId: rotationId ?? this.rotationId,
       supervisorId: supervisorId ?? this.supervisorId,
       residentId: residentId ?? this.residentId,
@@ -165,8 +184,8 @@ class ResidentEvaluation {
       residentSignatureDate:
           residentSignatureDate ?? this.residentSignatureDate,
       supervisorSignature: supervisorSignature ?? this.supervisorSignature,
-      supervisorSignatureDate:
-          supervisorSignatureDate ?? this.supervisorSignatureDate,
+      supervisorApproveDate:
+          supervisorApproveDate ?? this.supervisorApproveDate,
       isCompleted: isCompleted ?? this.isCompleted,
     );
   }
@@ -362,5 +381,16 @@ class ResidentEvaluation {
         ],
       ),
     ];
+  }
+
+  factory ResidentEvaluation.initial() {
+    return ResidentEvaluation(
+      rotationId: '',
+      supervisorId: '',
+      residentId: '',
+      supervisorName: '',
+      residentName: '',
+      rotationTitle: '',
+    );
   }
 }

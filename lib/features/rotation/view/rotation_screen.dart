@@ -201,13 +201,15 @@ class RotationDetailsPage extends ConsumerWidget {
                                           resident.id,
                                         ),
                                         getCurrentUserProvider!.id,
-                                        evaluations
-                                            .firstWhere(
-                                              (evaluation) =>
-                                                  evaluation.residentId ==
-                                                  resident.id,
-                                            )
-                                            .id!,
+                                        evaluations.isNotEmpty
+                                            ? evaluations
+                                                  .firstWhere(
+                                                    (evaluation) =>
+                                                        evaluation.residentId ==
+                                                        resident.id,
+                                                  )
+                                                  .id!
+                                            : null,
                                       ),
                                     )
                                     .toList(),
@@ -266,7 +268,7 @@ class RotationDetailsPage extends ConsumerWidget {
     Color avatarColor,
     bool isEvaluated,
     String supervisorId,
-    String evaluationId,
+    String? evaluationId,
   ) {
     return Row(
       children: [
@@ -288,7 +290,7 @@ class RotationDetailsPage extends ConsumerWidget {
           ),
         ),
         TextButton(
-          onPressed: isEvaluated
+          onPressed: evaluationId != null
               ? () {
                   Navigator.push(
                     context,
@@ -305,9 +307,12 @@ class RotationDetailsPage extends ConsumerWidget {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => ResidentEvaluationFormView(
+                        residentName: name,
                         rotationId: rotation.id,
                         supervisorId: supervisorId,
                         residentId: rotation.assignedResidents.keys.first,
+                        supervisorName: rotation.assignedSupervisors.keys.first,
+                        rotationName: rotation.title
                       ),
                     ),
                   );

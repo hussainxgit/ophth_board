@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ophth_board/features/supervisor/model/supervisor.dart';
 import 'package:ophth_board/features/supervisor/view/widgets/supervisor_profile_header_card.dart';
+import '../../evaluations/provider/resident_evaluation_provider.dart';
 import '../../leave_request/provider/leave_request_provider.dart';
 import '../../rotation/providers/rotation_provider.dart';
 import 'widgets/annual_leaves_list_card.dart';
@@ -29,6 +30,13 @@ class SupervisorProfileScreen extends ConsumerWidget {
         // Invalidate the current rotation provider to trigger a refresh
         ref.invalidate(supervisorActiveRotationsProvider(supervisor.id));
         ref.invalidate(supervisorLeaveRequestListProvider(supervisor.id));
+        if (activeRotation.value != null && activeRotation.value!.isNotEmpty) {
+          ref.invalidate(
+            getAllEvaluationsForRotationProvider(
+              activeRotation.value?.first.id ?? '',
+            ),
+          );
+        }
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),

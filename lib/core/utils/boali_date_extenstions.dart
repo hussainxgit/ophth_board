@@ -34,6 +34,11 @@ extension BoaliDateExtensions on DateTime {
     return year == date.year && month == date.month && day == date.day;
   }
 
+  bool isStarted() {
+    final now = DateTime.now();
+    return isBefore(now) || isSameDate(now);
+  }
+
   String get pastDatePeriod {
     final DateTime now = DateTime.now();
     final DateTime pastDate = DateTime(year, month, day);

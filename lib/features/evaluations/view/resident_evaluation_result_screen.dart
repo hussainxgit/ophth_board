@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ophth_board/features/evaluations/model/resident_evaluation/resident_evaluation.dart';
+import 'package:ophth_board/features/pdf/controller/pdf_controller.dart';
 import '../../pdf/view/pdf_viewer_screen.dart';
 import '../model/resident_evaluation/evaluation_category.dart';
 import '../provider/resident_evaluation_provider.dart';
@@ -22,7 +23,7 @@ class EvaluationResultsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
 
     final evaluation = ref.watch(
-      supervisorActiveRotationsProvider(evaluationId),
+      supervisorActiveRotationsProviderForResidents(evaluationId),
     );
 
     return SafeArea(
@@ -41,10 +42,7 @@ class EvaluationResultsScreen extends ConsumerWidget {
         ),
 
         appBar: AppBar(
-          title: Text(
-            'Evaluation Results',
-            style: TextStyle(color: Colors.white),
-          ),
+          title: Text('Evaluation Results'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop(),
@@ -196,7 +194,7 @@ class EvaluationResultsScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  evaluation.overallAverageScore.toStringAsFixed(1),
+                  evaluation.getOverallCompetence().toString(),
                   style: theme.textTheme.displaySmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -216,12 +214,12 @@ class EvaluationResultsScreen extends ConsumerWidget {
                   decoration: BoxDecoration(
                     color: _getPerformanceLevelColor(
                       context,
-                      evaluation.overallAverageScore,
+                      evaluation.getOverallCompetence().toDouble(),
                     ),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
-                    _getPerformanceLevelText(evaluation.overallAverageScore),
+                    _getPerformanceLevelText(evaluation.getOverallCompetence()),
                     style: theme.textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: theme.colorScheme.onPrimary,
@@ -269,7 +267,7 @@ class EvaluationResultsScreen extends ConsumerWidget {
 
   Widget _buildCategoryItem(BuildContext context, EvaluationCategory category) {
     final theme = Theme.of(context);
-    final averageScore = category.averageScore;
+    final averageScore = category.averageScore.round();
     final performanceLevel = _getPerformanceLevelText(averageScore);
 
     return Container(
@@ -308,7 +306,10 @@ class EvaluationResultsScreen extends ConsumerWidget {
               Text(
                 performanceLevel,
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: _getPerformanceLevelColor(context, averageScore),
+                  color: _getPerformanceLevelColor(
+                    context,
+                    averageScore.toDouble(),
+                  ),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -371,11 +372,12 @@ class EvaluationResultsScreen extends ConsumerWidget {
     );
   }
 
-  String _getPerformanceLevelText(double score) {
-    if (score >= 4.5) return 'Superior';
-    if (score >= 3.5) return 'Exceeds';
-    if (score >= 2.5) return 'Meets';
-    if (score >= 1.5) return 'Below';
+  String _getPerformanceLevelText(int score) {
+    if (score >= 4) return 'Superior';
+    if (score >= 4) return 'Excesseds';
+    if (score >= 3) return 'Meets';
+    if (score >= 2) return 'Below';
+    if (score >= 1) return 'Unsatisfactory';
     return 'Unsatisfactory';
   }
 
@@ -410,10 +412,9 @@ class EvaluationResultsScreen extends ConsumerWidget {
     }
   }
 
-  void _savePDF(BuildContext context, ResidentEvaluation evaluation) {
-    // Navigator.of(
-    //   context,
-    // ).push(MaterialPageRoute(builder: (context) => PdfViewerScreen()));
+  void _savePDF(BuildContext context, ResidentEvaluation evaluation) async {
+    final PdfController pdfController = PdfController();
+    await pdfController.fillAndViewForm(context, evaluation);
   }
 
   void _shareResults(BuildContext context) {

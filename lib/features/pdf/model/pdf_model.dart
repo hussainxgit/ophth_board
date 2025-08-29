@@ -24,15 +24,29 @@ class PdfModel {
       PdfFormFieldCollection fields = form.fields;
       for (int i = 0; i < fields.count; i++) {
         var field = fields[i];
-        print('Field Name: ${field.name}, type: ${field.runtimeType} items: $field');
+
+        // Handle different field types with null checks
         if (field is PdfTextBoxField && formData.containsKey(field.name)) {
-          field.text = formData[field.name] as String;
+          final value = formData[field.name];
+          field.text = value?.toString() ?? '';
         } else if (field is PdfRadioButtonListField &&
             formData.containsKey(field.name)) {
-          field.selectedIndex = formData[field.name] as int;
+          final value = formData[field.name];
+          if (value != null && value is int) {
+            // Validate index is within bounds
+            if (value >= 0 && value < field.items.count) {
+              field.selectedIndex = value;
+              print('Set ${field.name} to index $value');
+            } else {
+              print(
+                'Warning: Index $value out of bounds for ${field.name} (max: ${field.items.count - 1})',
+              );
+            }
+          }
         } else if (field is PdfCheckBoxField &&
             formData.containsKey(field.name)) {
-          field.isChecked = formData[field.name] as bool;
+          final value = formData[field.name];
+          field.isChecked = value == true;
         }
       }
 

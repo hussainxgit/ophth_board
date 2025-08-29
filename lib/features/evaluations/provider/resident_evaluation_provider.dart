@@ -16,7 +16,7 @@ class ResidentEvaluationNotifier
 
   void createNewEvaluation() {
     state = ResidentEvaluationState(
-      currentEvaluation: ResidentEvaluation(),
+      currentEvaluation: ResidentEvaluation.initial(),
       isLoading: false,
       errorMessage: null,
     );
@@ -66,7 +66,11 @@ class ResidentEvaluationNotifier
       updatedEvaluation = updatedEvaluation.copyWith(
         additionalComments: value as String,
       );
-    }
+    } else if (fieldName == 'residentName') {
+      updatedEvaluation = updatedEvaluation.copyWith(
+        residentName: value as String,
+      );}
+
     // Add more fields as needed
 
     state = state.copyWith(currentEvaluation: updatedEvaluation);
@@ -176,7 +180,7 @@ final getAllEvaluationsForRotationProvider =
     });
     
 /// Provider to fetch resident evaluation
-final supervisorActiveRotationsProvider = FutureProvider.family<ResidentEvaluation?, String>((
+final supervisorActiveRotationsProviderForResidents = FutureProvider.family<ResidentEvaluation?, String>((
   ref,
   evaluationId,
 ) async {

@@ -52,6 +52,7 @@ class ResidentProfileScreen extends ConsumerWidget {
                   ? CurrentRotationCard(
                       rotation: rotation,
                       residentId: resident.id,
+                      residentName: resident.fullName,
                     )
                   : Center(
                       child: const Text(

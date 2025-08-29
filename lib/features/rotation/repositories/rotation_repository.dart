@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ophth_board/core/utils/boali_date_extenstions.dart';
 
 import '../../../core/firebase/firebase_service.dart';
 import '../model/rotation.dart';
@@ -143,13 +144,11 @@ class RotationRepository {
   ) async {
     try {
       final rotations = await getAllRotations();
-      final now = DateTime.now();
-
       return rotations
           .where(
             (rotation) =>
                 rotation.assignedSupervisors[superviorId] == true &&
-                rotation.startDate.isAfter(now),
+                rotation.startDate.isStarted(),
           )
           .toList();
     } catch (e) {
