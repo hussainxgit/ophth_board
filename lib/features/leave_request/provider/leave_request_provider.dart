@@ -41,6 +41,13 @@ final leaveRequestOperationsProvider =
       LeaveRequestOperationsNotifier.new,
     );
 
+// Pending leave requests (for residents)
+final residentLeaveRequestListProvider =
+    FutureProvider.family<List<LeaveRequest>, String>((ref, residentId) async {
+      final repository = ref.watch(leaveRequestRepositoryProvider);
+      return repository.getResidentPendingLeaveRequests(residentId);
+    });
+
 class LeaveRequestOperationsNotifier extends Notifier<void> {
   @override
   void build() {}

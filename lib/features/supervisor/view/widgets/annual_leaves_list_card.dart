@@ -34,7 +34,6 @@ class SupervisorAnnualLeavesListCard extends ConsumerWidget {
                   );
                 },
                 onDeny: () {
-                  print('Rejecting leave');
                   ref
                       .read(leaveRequestOperationsProvider.notifier)
                       .updateLeaveRequestStatus(
@@ -44,7 +43,6 @@ class SupervisorAnnualLeavesListCard extends ConsumerWidget {
                       );
                 },
                 onApprove: () {
-                  print('Approving leave');
                   ref
                       .read(leaveRequestOperationsProvider.notifier)
                       .updateLeaveRequestStatus(

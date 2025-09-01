@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ophth_board/features/leave_request/view/leave_list_screen.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
-import '../../../features/resident/view/resident_leave_screen.dart';
 import '../settings_screen.dart';
 
 class AppDrawer extends ConsumerWidget {
@@ -48,9 +48,12 @@ class AppDrawer extends ConsumerWidget {
                   context,
                   icon: Icons.flight_takeoff,
                   title: 'Leave Requests',
-                  onTap: () => user.role == UserRole.resident
-                      ? _navigateTo(context, const ResidentLeaveScreen())
-                      : Navigator.pop(context),
+                  onTap: () => _navigateTo(
+                    context,
+                    LeaveListScreen(
+                      supervisorId: user.id, // Replace with actual ID
+                    ),
+                  ),
                 ),
                 _buildMenuItem(
                   context,

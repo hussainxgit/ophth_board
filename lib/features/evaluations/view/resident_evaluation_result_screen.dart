@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ophth_board/features/evaluations/model/resident_evaluation/resident_evaluation.dart';
 import 'package:ophth_board/features/pdf/controller/pdf_controller.dart';
-import '../../pdf/view/pdf_viewer_screen.dart';
 import '../model/resident_evaluation/evaluation_category.dart';
 import '../provider/resident_evaluation_provider.dart';
 
@@ -47,12 +46,6 @@ class EvaluationResultsScreen extends ConsumerWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.share),
-              onPressed: () => _shareResults(context),
-            ),
-          ],
         ),
         body: evaluation.when(
           data: (evaluation) {

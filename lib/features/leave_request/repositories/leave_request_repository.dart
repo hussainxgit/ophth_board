@@ -45,6 +45,34 @@ class LeaveRequestRepository {
         );
   }
 
+  /// Fetches all pending leave requests for resident.
+  Future<List<LeaveRequest>> getResidentPendingLeaveRequests(
+    String residentId,
+  ) async {
+    try {
+      final querySnapshot = await _firestoreService.getCollectionWithQuery(
+        _collectionPath,
+        filters: [
+          QueryFilter(
+            field: 'residentId',
+            type: FilterType.isEqualTo,
+            value: residentId,
+          ),
+          QueryFilter(
+            field: 'status',
+            type: FilterType.isEqualTo,
+            value: 'pending',
+          ),
+        ],
+      );
+      return querySnapshot.docs
+          .map((doc) => LeaveRequest.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      throw 'Error fetching residents leaves requests: $e';
+    }
+  }
+
   /// Fetches all pending leave requests for supervisors to review.
   /// This can be modified to filter by supervisorId if requests are assigned.
   Future<List<LeaveRequest>> getSupervisorPendingLeaveRequests(
