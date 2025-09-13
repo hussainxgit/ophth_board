@@ -95,30 +95,6 @@ class CurrentRotationCard extends StatelessWidget {
                   ),
                 ],
               ),
-
-              const SizedBox(height: 16),
-              rotation.assignedSupervisors.isNotEmpty
-                  ? Center(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => ResidentEvaluationFormView(
-                                rotationId: rotation.id,
-                                supervisorId:
-                                    rotation.assignedSupervisors.keys.first,
-                                residentId: residentId,
-                                residentName: residentName,
-                                supervisorName: rotation.assignedSupervisors.keys.first,
-                                rotationName: rotation.title,
-                              ),
-                            ),
-                          );
-                        },
-                        child: const Text('Evaluate Resident'),
-                      ),
-                    )
-                  : Container(),
             ],
           ),
         ),

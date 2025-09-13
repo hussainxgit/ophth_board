@@ -21,16 +21,20 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          ListTile(
-            leading: const Icon(Icons.color_lens),
-            title: const Text('Theme & Appearance'),
-            subtitle: const Text('Customize app theme and colors'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () async {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const ThemeSettingsScreen()),
-              );
-            },
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.color_lens),
+              title: const Text('Theme & Appearance'),
+              subtitle: const Text('Customize app theme and colors'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () async {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const ThemeSettingsScreen(),
+                  ),
+                );
+              },
+            ),
           ),
           // Add more settings sections here as needed
         ],

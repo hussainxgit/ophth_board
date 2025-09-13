@@ -188,3 +188,13 @@ final supervisorActiveRotationsProviderForResidents = FutureProvider.family<Resi
   final repository = ref.watch(residentEvaluationRepositoryProvider);
   return repository.getEvaluationById(evaluationId);
 });
+
+// get evaluations for a resident
+final getAllEvaluationsForResidentProvider =
+    FutureProvider.family<List<ResidentEvaluation>, String>((
+      ref,
+      residentId,
+    ) async {
+      final repository = ref.read(residentEvaluationRepositoryProvider);
+      return repository.getAllEvaluationsForResident(residentId);
+    });

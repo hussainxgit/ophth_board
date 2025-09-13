@@ -67,3 +67,10 @@ class LeaveRequestOperationsNotifier extends Notifier<void> {
         .updateLeaveRequestStatus(requestId, newStatus, approverId, comments);
   }
 }
+
+// All leaves for a resident
+final allResidentLeavesProvider =
+    FutureProvider.family<List<LeaveRequest>, String>((ref, residentId) async {
+      final repository = ref.watch(leaveRequestRepositoryProvider);
+      return repository.getAllLeavesForResident(residentId);
+    });

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../model/leave_request.dart';
+import '../../pdf/controller/pdf_controller.dart';
 
 class LeaveDetailsScreen extends ConsumerWidget {
   final LeaveRequest leaveRequest;
@@ -15,7 +16,25 @@ class LeaveDetailsScreen extends ConsumerWidget {
     final textTheme = theme.textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: Text('Leave Details'), elevation: 0),
+      appBar: AppBar(
+        title: Text('Leave Details'),
+        elevation: 0,
+        actions: [
+          !leaveRequest.isApproved()
+              ? const SizedBox.shrink()
+              : IconButton(
+                  icon: const Icon(Icons.picture_as_pdf),
+                  tooltip: 'Export PDF',
+                  onPressed: () async {
+                    // Fill the leave PDF and open viewer
+                    await PdfController().fillAndViewLeaveForm(
+                      context,
+                      leaveRequest,
+                    );
+                  },
+                ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(

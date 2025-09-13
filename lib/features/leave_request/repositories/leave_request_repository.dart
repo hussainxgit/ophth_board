@@ -125,4 +125,25 @@ class LeaveRequestRepository {
       return Result.error('An unexpected error occurred: $e');
     }
   }
+
+  /// Fetches all leave requests for a specific resident.
+  Future<List<LeaveRequest>> getAllLeavesForResident(String residentId) async {
+    try {
+      final querySnapshot = await _firestoreService.getCollectionWithQuery(
+        _collectionPath,
+        filters: [
+          QueryFilter(
+            field: 'residentId',
+            type: FilterType.isEqualTo,
+            value: residentId,
+          ),
+        ],
+      );
+      return querySnapshot.docs
+          .map((doc) => LeaveRequest.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      throw 'Error fetching all leaves for resident: $e';
+    }
+  }
 }

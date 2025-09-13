@@ -1,10 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum LeaveStatus {
-  pending,
-  approved,
-  rejected,
-}
+enum LeaveStatus { pending, approved, rejected }
 
 extension LeaveStatusExtension on LeaveStatus {
   String toDisplayString() {
@@ -19,10 +15,22 @@ extension LeaveStatusExtension on LeaveStatus {
   }
 }
 
+// Helper serialization functions to keep enum <-> string conversion consistent
+String leaveStatusToString(LeaveStatus status) => status.name;
+
+LeaveStatus leaveStatusFromString(String? value) {
+  if (value == null) return LeaveStatus.pending;
+  return LeaveStatus.values.firstWhere(
+    (e) => e.name == value,
+    orElse: () => LeaveStatus.pending,
+  );
+}
+
 class LeaveRequest {
   final String? id; // Null for new requests, assigned by Firestore
   final String residentId;
-  final String residentName; // To easily display resident name in supervisor view
+  final String
+  residentName; // To easily display resident name in supervisor view
   final String? supervisorId; // Optional, if a specific supervisor is assigned
   final DateTime startDate;
   final DateTime endDate;
@@ -58,9 +66,7 @@ class LeaveRequest {
       startDate: (data['startDate'] as Timestamp).toDate(),
       endDate: (data['endDate'] as Timestamp).toDate(),
       notes: data['notes'] as String,
-      status: LeaveStatus.values.firstWhere(
-          (e) => e.toString() == 'LeaveStatus.${data['status']}',
-          orElse: () => LeaveStatus.pending),
+      status: leaveStatusFromString(data['status'] as String?),
       requestedAt: (data['requestedAt'] as Timestamp).toDate(),
       approvedRejectedAt: (data['approvedRejectedAt'] as Timestamp?)?.toDate(),
       approverId: data['approverId'] as String?,
@@ -76,7 +82,9 @@ class LeaveRequest {
       'startDate': Timestamp.fromDate(startDate),
       'endDate': Timestamp.fromDate(endDate),
       'notes': notes,
-      'status': status.toString().split('.').last, // Store enum as string
+      'status': leaveStatusToString(
+        status,
+      ), // Store enum as string (consistent helper)
       'requestedAt': Timestamp.fromDate(requestedAt),
       'approvedRejectedAt': approvedRejectedAt != null
           ? Timestamp.fromDate(approvedRejectedAt!)
@@ -84,5 +92,11 @@ class LeaveRequest {
       'approverId': approverId,
       'supervisorComments': supervisorComments,
     };
+  }
+
+  int get totalDays => endDate.difference(startDate).inDays + 1;
+
+  bool isApproved() {
+    return status == LeaveStatus.approved;
   }
 }

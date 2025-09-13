@@ -76,9 +76,7 @@ class SupervisorProfileScreen extends ConsumerWidget {
             supervisorLeaveRequestList.when(
               data: (annualLeaveRequestList) =>
                   annualLeaveRequestList.isNotEmpty
-                  ? SupervisorAnnualLeavesListCard(
-                      leaveRequestList: annualLeaveRequestList,
-                    )
+                  ? SupervisorAnnualLeavesListCard()
                   : Center(
                       child: const Text(
                         'No pending leaves requests',

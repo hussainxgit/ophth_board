@@ -8,8 +8,15 @@ import 'package:share_plus/share_plus.dart';
 
 class PdfViewerScreen extends StatefulWidget {
   final String pdfPath;
+  final String? title;
+  final String? filenamePrefix;
 
-  const PdfViewerScreen({super.key, required this.pdfPath});
+  const PdfViewerScreen({
+    super.key,
+    required this.pdfPath,
+    this.title,
+    this.filenamePrefix,
+  });
 
   @override
   State<PdfViewerScreen> createState() => _PdfViewerScreenState();
@@ -22,7 +29,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Resident Evaluation'),
+        title: Text(widget.title ?? 'PDF Viewer'),
         actions: [
           // Share button
           IconButton(icon: const Icon(Icons.share), onPressed: _shareFile),
@@ -74,11 +81,13 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
     try {
       final file = File(widget.pdfPath);
       if (await file.exists()) {
+        final subject = widget.filenamePrefix ?? 'form';
+        final text = 'Please find the attached ${widget.title ?? 'form'}.';
         await SharePlus.instance.share(
           ShareParams(
             files: [XFile(widget.pdfPath)],
-            subject: 'Resident Evaluation Form',
-            text: 'Please find the attached Resident Evaluation Form.',
+            subject: subject,
+            text: text,
           ),
         );
       } else {
@@ -120,7 +129,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
 
       // Generate unique filename
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final fileName = 'resident_evaluation_$timestamp.pdf';
+      final fileName = '${widget.filenamePrefix ?? 'form'}_$timestamp.pdf';
       final downloadPath = '${downloadsDir.path}/$fileName';
 
       // Copy file to downloads

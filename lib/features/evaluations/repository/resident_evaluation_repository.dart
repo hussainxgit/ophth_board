@@ -83,6 +83,30 @@ class ResidentEvaluationRepository {
       rethrow;
     }
   }
+
+  // get all evaluations for a resident
+  Future<List<ResidentEvaluation>> getAllEvaluationsForResident(
+    String residentId,
+  ) async {
+    try {
+      final querySnapshot = await _firestoreService.getCollectionWithQuery(
+        _collectionPath,
+        filters: [
+          QueryFilter(
+            field: 'residentId',
+            type: FilterType.isEqualTo,
+            value: residentId,
+          ),
+        ],
+      );
+      return querySnapshot.docs
+          .map((doc) => ResidentEvaluation.fromFirebase(doc))
+          .toList();
+    } catch (e) {
+      print('Error fetching evaluations: $e');
+      rethrow;
+    }
+  }
 }
 
 final residentEvaluationRepositoryProvider =

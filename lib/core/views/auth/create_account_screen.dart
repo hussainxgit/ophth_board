@@ -18,6 +18,8 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _phoneNumberController = TextEditingController();
+  final _civilIdController = TextEditingController();
+  final _fileNumberController = TextEditingController();
 
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
@@ -32,6 +34,8 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen> {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneNumberController.dispose();
+    _civilIdController.dispose();
+    _fileNumberController.dispose();
     super.dispose();
   }
 
@@ -200,10 +204,31 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen> {
                   // Phone Number (Optional)
                   _buildTextField(
                     controller: _phoneNumberController,
-                    label: 'Phone Number (Optional)',
+                    label: 'Phone Number',
                     hint: 'Enter your phone number',
                     icon: Icons.phone_outlined,
                     keyboardType: TextInputType.phone,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Civil ID
+                  _buildTextField(
+                    controller: _civilIdController,
+                    label: 'Civil ID Number',
+                    hint: 'Enter your civil ID number',
+                    icon: Icons.card_membership_outlined,
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // File number
+                  _buildTextField(
+                    controller: _fileNumberController,
+                    label: 'File Number',
+                    hint: 'Enter your file number',
+                    icon: Icons.card_membership_outlined,
+                    keyboardType: TextInputType.number,
                   ),
 
                   const SizedBox(height: 16),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../evaluations/model/resident_evaluation/resident_evaluation.dart';
 import '../../evaluations/model/resident_evaluation/resident_evaluation_enums.dart';
+import '../../leave_request/model/leave_request.dart';
 import '../model/pdf_model.dart';
 import '../view/pdf_viewer_screen.dart';
 
@@ -27,10 +28,76 @@ class PdfController {
     }
   }
 
-  Future<void> fillAndViewForm(
+  // Backwards-compatible method for evaluations
+  Future<void> fillAndViewEvaluationForm(
     BuildContext context,
     ResidentEvaluation residentEvaluation,
   ) async {
+    final formData = _buildEvaluationFormData(residentEvaluation);
+    final template = 'assets/pdf_forms/form_template.pdf';
+    await _fillAndShow(
+      context,
+      formData,
+      templateAsset: template,
+      title: 'Resident Evaluation',
+      filenamePrefix: 'resident_evaluation',
+    );
+  }
+
+  // New method for leave requests
+  Future<void> fillAndViewLeaveForm(
+    BuildContext context,
+    LeaveRequest leaveRequest,
+  ) async {
+    final formData = _buildLeaveFormData(leaveRequest);
+    final template = 'assets/pdf_forms/resident_leave_request.pdf';
+    await _fillAndShow(
+      context,
+      formData,
+      templateAsset: template,
+      title: 'Leave Request',
+      filenamePrefix: 'leave_request',
+    );
+  }
+
+  // Generic internal method
+  Future<void> _fillAndShow(
+    BuildContext context,
+    Map<String, dynamic> formData, {
+    required String templateAsset,
+    required String title,
+    required String filenamePrefix,
+  }) async {
+    try {
+      final outputPath = await _model.fillPdfForm(
+        context,
+        formData,
+        templateAsset: templateAsset,
+      );
+      if (!context.mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PdfViewerScreen(
+            pdfPath: outputPath,
+            title: title,
+            filenamePrefix: filenamePrefix,
+          ),
+        ),
+      );
+    } catch (e) {
+      print('Error filling PDF form: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
+  }
+
+  Map<String, dynamic> _buildEvaluationFormData(
+    ResidentEvaluation residentEvaluation,
+  ) {
     // Flatten evaluation criteria from all categories
     final criteria = residentEvaluation.categories
         .expand((category) => category.criteria)
@@ -46,7 +113,7 @@ class PdfController {
       EvaluationScore.notApplicable: 5,
     };
 
-    // Create form data map
+    // Base fields
     final Map<String, dynamic> formData = {
       'program': 'Ophtalmology',
       'rotation': residentEvaluation.rotationTitle,
@@ -101,40 +168,26 @@ class PdfController {
     ];
 
     for (int i = 0; i < criteria.length && i < criteriaMapping.length; i++) {
-      print(criteria[i].name);
       if (criteria[i].name == criteriaMapping[i]) {
         final scoreIndex = scoreToIndex[criteria[i].score];
-        print('Filling ${criteria[i].name} with index $scoreIndex');
         if (scoreIndex != null) {
           formData['$i'] = scoreIndex;
-        } else {
-          print(
-            'Warning: No score mapping for ${criteria[i].name} (${criteria[i].score})',
-          );
         }
-      } else {
-        print(
-          'Warning: Criteria name mismatch: ${criteria[i].name} != ${criteriaMapping[i]}',
-        );
       }
     }
 
-    try {
-      final outputPath = await _model.fillPdfForm(context, formData);
-      if (!context.mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PdfViewerScreen(pdfPath: outputPath),
-        ),
-      );
-    } catch (e) {
-      print('Error filling PDF form: $e');
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
-    }
+    return formData;
+  }
+
+  Map<String, dynamic> _buildLeaveFormData(LeaveRequest leaveRequest) {
+    // Map leave request fields to PDF form field names expected by template
+    return {
+      'resident_name': leaveRequest.residentName,
+      'leave_type': 'annual', // Placeholder, adjust as needed
+      'leave_start_date': leaveRequest.startDate.toIso8601String(),
+      'leave__total_days': leaveRequest.totalDays.toString(),
+      'leave_end_date': leaveRequest.endDate.toIso8601String(),
+      'status': leaveRequest.status.toDisplayString(),
+    };
   }
 }

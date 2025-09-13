@@ -5,7 +5,6 @@ import '../../features/resident/model/resident.dart';
 import '../../features/supervisor/model/supervisor.dart';
 
 abstract class AuthRepository {
-
   Future<UserCredentials?> signIn({
     required String email,
     required String password,
@@ -115,6 +114,9 @@ class AuthRepositoryImpl implements AuthRepository {
           profileImageUrl: data['profileImageUrl'],
           phoneNumber: data['phoneNumber'],
           isActive: data['isActive'] ?? true,
+          civilId: data['civilId'] ?? '',
+          workingPlace: data['workingPlace'] ?? '',
+          fileNumber: data['fileNumber'] ?? '',
         );
       case 'supervisor':
         return Supervisor(
@@ -133,6 +135,9 @@ class AuthRepositoryImpl implements AuthRepository {
           profileImageUrl: data['profileImageUrl'],
           phoneNumber: data['phoneNumber'],
           isActive: data['isActive'] ?? true,
+          civilId: data['civilId'] ?? '',
+          workingPlace: data['workingPlace'] ?? '',
+          fileNumber: data['fileNumber'] ?? '',
         );
       default:
         throw Exception('Unknown user role: ${data['role']}');

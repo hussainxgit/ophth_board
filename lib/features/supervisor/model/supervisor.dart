@@ -13,6 +13,7 @@ class Supervisor extends UserCredentials {
     required super.email,
     required super.firstName,
     required super.lastName,
+    required super.civilId,
     super.profileImageUrl,
     required super.createdAt,
     required super.updatedAt,
@@ -20,6 +21,8 @@ class Supervisor extends UserCredentials {
     super.phoneNumber,
     required this.assignedResidents,
     this.averageScore,
+    super.workingPlace,
+    super.fileNumber,
     required this.activeRotations,
   });
 
@@ -42,6 +45,9 @@ class Supervisor extends UserCredentials {
       'assignedResidents': assignedResidents,
       'averageScore': averageScore,
       'activeRotations': activeRotations,
+      'civilId': civilId,
+      'workingPlace': workingPlace,
+      'fileNumber': fileNumber,
     };
   }
 
@@ -59,6 +65,9 @@ class Supervisor extends UserCredentials {
       assignedResidents: Map<String, bool>.from(json['assignedResidents']),
       averageScore: json['averageScore'],
       activeRotations: Map<String, bool>.from(json['activeRotations']),
+      civilId: json['civilId'],
+      workingPlace: json['workingPlace'],
+      fileNumber: json['fileNumber'],
     );
   }
 
@@ -80,6 +89,9 @@ class Supervisor extends UserCredentials {
       ),
       averageScore: (data['averageScore'] as num?)?.toDouble(),
       activeRotations: Map<String, bool>.from(data['activeRotations'] ?? {}),
+      civilId: data['civilId'] ?? '',
+      workingPlace: data['workingPlace'],
+      fileNumber: data['fileNumber'],
     );
   }
 

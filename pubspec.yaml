@@ -34,3 +34,5 @@ flutter:
 
   assets:
     - assets/pdf_forms/form_template.pdf
+    - assets/pdf_forms/resident_leave_request.pdf
+

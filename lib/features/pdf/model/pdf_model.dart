@@ -3,16 +3,17 @@ import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
+enum PdfFormType { evaluation, leave }
+
 class PdfModel {
   Future<String> fillPdfForm(
     BuildContext context,
-    Map<String, dynamic> formData,
-  ) async {
+    Map<String, dynamic> formData, {
+    String templateAsset = 'assets/pdf_forms/form_template.pdf',
+  }) async {
     try {
       // Load the PDF document from assets
-      final bytes = await DefaultAssetBundle.of(
-        context,
-      ).load('assets/pdf_forms/form_template.pdf');
+      final bytes = await DefaultAssetBundle.of(context).load(templateAsset);
       final PdfDocument document = PdfDocument(
         inputBytes: bytes.buffer.asUint8List(),
       );

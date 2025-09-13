@@ -6,6 +6,8 @@ import 'package:ophth_board/features/evaluations/provider/resident_evaluation_pr
 
 import '../../../core/models/user.dart';
 import '../../../core/providers/auth_provider.dart';
+import '../../../core/views/widgets/bottom_sheet.dart';
+import 'forms/create_rotation_form.dart';
 import '../../evaluations/view/resident_evaluation_form_view.dart';
 import '../../evaluations/view/resident_evaluation_result_screen.dart';
 import '../../resident/providers/resident_provider.dart';
@@ -40,13 +42,35 @@ class RotationDetailsPage extends ConsumerWidget {
         ),
         title: const Text('Rotation Details'),
         actions: [
-          IconButton(
-            icon: Icon(
-              Icons.more_vert,
-              color: Theme.of(context).colorScheme.surfaceContainer,
+          if (isSupervisor)
+            IconButton(
+              icon: Icon(
+                Icons.edit,
+                color: Theme.of(context).colorScheme.surfaceContainer,
+              ),
+              onPressed: () async {
+                // Show the custom bottom sheet with the CreateRotationForm in edit mode
+                await CustomBottomSheet.show(
+                  context: context,
+                  child: CreateRotationForm(
+                    initialRotation: rotation,
+                    onSaved: () {
+                      // Optionally you can trigger a refresh here if needed
+                    },
+                  ),
+                  height: MediaQuery.of(context).size.height * 0.9,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                );
+              },
+            )
+          else
+            IconButton(
+              icon: Icon(
+                Icons.more_vert,
+                color: Theme.of(context).colorScheme.surfaceContainer,
+              ),
+              onPressed: () {},
             ),
-            onPressed: () {},
-          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -312,7 +336,7 @@ class RotationDetailsPage extends ConsumerWidget {
                         supervisorId: supervisorId,
                         residentId: rotation.assignedResidents.keys.first,
                         supervisorName: rotation.assignedSupervisors.keys.first,
-                        rotationName: rotation.title
+                        rotationName: rotation.title,
                       ),
                     ),
                   );

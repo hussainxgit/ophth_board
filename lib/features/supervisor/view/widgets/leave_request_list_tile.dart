@@ -7,7 +7,7 @@ class LeaveRequestTile extends StatelessWidget {
   final LeaveRequest leaveRequest;
   final VoidCallback? onTap;
   final VoidCallback? onApprove;
-  final VoidCallback? onDeny;
+  final void Function(String? comments)? onDeny;
 
   const LeaveRequestTile({
     super.key,
@@ -19,10 +19,11 @@ class LeaveRequestTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String? lastDismissReason;
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Dismissible(
-        key: Key(leaveRequest.id.toString()),
+        key: Key(leaveRequest.id ?? UniqueKey().toString()),
         direction: DismissDirection.endToStart,
         background: Container(
           alignment: Alignment.centerRight,
@@ -47,7 +48,7 @@ class LeaveRequestTile extends StatelessWidget {
           ),
         ),
         confirmDismiss: (direction) async {
-          return await showDialog(
+          final confirmed = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
               title: const Text('Deny Leave Request'),
@@ -67,9 +68,45 @@ class LeaveRequestTile extends StatelessWidget {
               ],
             ),
           );
+
+          if (confirmed != true) return false;
+
+          // Prompt for optional denial reason
+          final reason = await showDialog<String?>(
+            context: context,
+            builder: (context) {
+              final controller = TextEditingController();
+              return AlertDialog(
+                title: const Text('Deny Reason (optional)'),
+                content: TextField(
+                  controller: controller,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    hintText:
+                        'Enter a reason or comment for denying (optional)',
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(null),
+                    child: const Text('Skip'),
+                  ),
+                  TextButton(
+                    onPressed: () =>
+                        Navigator.of(context).pop(controller.text.trim()),
+                    child: const Text('Submit'),
+                  ),
+                ],
+              );
+            },
+          );
+
+          lastDismissReason = reason;
+
+          return true;
         },
         onDismissed: (direction) {
-          onDeny?.call();
+          onDeny?.call(lastDismissReason);
         },
         child: InkWell(
           onTap: onTap,
@@ -126,9 +163,12 @@ class LeaveRequestTile extends StatelessWidget {
             ],
           ),
         ),
-        ElevatedButton(onPressed: (){
-          onApprove?.call();
-        }, child: const Text('Approve')),
+        ElevatedButton(
+          onPressed: () {
+            onApprove?.call();
+          },
+          child: const Text('Approve'),
+        ),
       ],
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ophth_board/features/leave_request/view/leave_list_screen.dart';
+import 'package:ophth_board/features/rotation/view/rotation_list_screen.dart';
+import '../../../features/evaluations/view/evaluation_list_screen.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import '../settings_screen.dart';
@@ -31,36 +33,32 @@ class AppDrawer extends ConsumerWidget {
                   isSelected: true,
                   onTap: () => Navigator.pop(context),
                 ),
-                const Divider(height: 1, thickness: 1),
+                // const Divider(height: 1, thickness: 1),
+                // _buildMenuItem(
+                //   context,
+                //   icon: Icons.calendar_today,
+                //   title: 'Schedule',
+                //   onTap: () => Navigator.pop(context),
+                // ),
                 _buildMenuItem(
                   context,
-                  icon: Icons.calendar_today,
-                  title: 'Schedule',
-                  onTap: () => Navigator.pop(context),
+                  icon: Icons.rotate_right,
+                  title: 'Rotations',
+                  onTap: () => _navigateTo(context, RotationListScreen()),
                 ),
                 _buildMenuItem(
                   context,
                   icon: Icons.check_circle,
                   title: 'Evaluations',
-                  onTap: () => Navigator.pop(context),
+                  onTap: () => {_navigateTo(context, EvaluationListScreen())},
                 ),
                 _buildMenuItem(
                   context,
                   icon: Icons.flight_takeoff,
                   title: 'Leave Requests',
-                  onTap: () => _navigateTo(
-                    context,
-                    LeaveListScreen(
-                      supervisorId: user.id, // Replace with actual ID
-                    ),
-                  ),
+                  onTap: () => _navigateTo(context, LeaveListScreen()),
                 ),
-                _buildMenuItem(
-                  context,
-                  icon: Icons.rotate_right,
-                  title: 'Rotations',
-                  onTap: () => Navigator.pop(context),
-                ),
+
                 const Divider(height: 1, thickness: 1),
                 _buildMenuItem(
                   context,

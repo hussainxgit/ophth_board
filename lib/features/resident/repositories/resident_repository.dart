@@ -11,8 +11,15 @@ class ResidentRepository {
 
   Future<List<Resident>> getAllResidents() async {
     try {
-      final querySnapshot = await _firestoreService.getCollection(
+      final querySnapshot = await _firestoreService.getCollectionWithQuery(
         _collectionPath,
+        filters: [
+          QueryFilter(
+            field: 'role',
+            type: FilterType.isEqualTo,
+            value: 'resident',
+          ),
+        ],
       );
       return querySnapshot.docs
           .map((doc) => Resident.fromFirestore(doc))

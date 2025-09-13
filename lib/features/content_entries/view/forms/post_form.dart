@@ -132,10 +132,6 @@ class _PostFormState extends ConsumerState<PostForm> {
             children: [
               _buildTitleField(),
               const SizedBox(height: 16),
-              _buildAuthorField(),
-              const SizedBox(height: 16),
-              _buildAuthorIdField(),
-              const SizedBox(height: 16),
               _buildContentField(),
               const SizedBox(height: 16),
               _buildTagsField(),

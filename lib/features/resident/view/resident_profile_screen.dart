@@ -7,6 +7,8 @@ import 'package:ophth_board/features/resident/view/widgets/resident_profile_head
 import 'package:ophth_board/features/resident/view/widgets/current_rotation_card.dart';
 
 import '../../leave_request/provider/leave_request_provider.dart';
+import '../../leave_request/view/leave_details_screen.dart';
+import '../../leave_request/view/widgets/leave_list_card.dart';
 import '../../rotation/providers/rotation_provider.dart';
 import 'widgets/resident_profile_list_header.dart';
 import 'widgets/rotation_progress_card.dart';
@@ -30,7 +32,6 @@ class ResidentProfileScreen extends ConsumerWidget {
         // Invalidate the current rotation provider to trigger a refresh
         ref.invalidate(currentRotationProvider(resident.id));
         ref.invalidate(upcomingRotationsProvider(resident.id));
-
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -97,12 +98,39 @@ class ResidentProfileScreen extends ConsumerWidget {
                     builder: (context) => const AnnualLeaveRequestForm(),
                   ),
                 );
-
               },
             ),
             annualLeaveRequestList.when(
-              data: (annualLeaveRequestList) => annualLeaveRequestList.isNotEmpty
-                  ? AnnualLeavesListCard(leaveRequestList: annualLeaveRequestList)
+              data: (annualLeaveRequestList) =>
+                  annualLeaveRequestList.isNotEmpty
+                  ? Column(
+                      children: annualLeaveRequestList
+                          .map((leaveRequest) {
+                            return LeaveListCard(
+                              leaveRequest: leaveRequest,
+                              isSupervisor: false,
+                              onApprove: null,
+                              onReject: null,
+                              onViewDetails: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => LeaveDetailsScreen(
+                                      leaveRequest: leaveRequest,
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          })
+                          .toList()
+                          .getRange(
+                            0,
+                            annualLeaveRequestList.length >= 3
+                                ? 3
+                                : annualLeaveRequestList.length,
+                          )
+                          .toList(),
+                    )
                   : Center(
                       child: const Text(
                         'No pending leaves requests',

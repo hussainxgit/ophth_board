@@ -407,7 +407,7 @@ class EvaluationResultsScreen extends ConsumerWidget {
 
   void _savePDF(BuildContext context, ResidentEvaluation evaluation) async {
     final PdfController pdfController = PdfController();
-    await pdfController.fillAndViewForm(context, evaluation);
+    await pdfController.fillAndViewEvaluationForm(context, evaluation);
   }
 
   void _shareResults(BuildContext context) {

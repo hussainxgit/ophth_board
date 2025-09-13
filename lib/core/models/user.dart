@@ -9,6 +9,9 @@ abstract class UserCredentials {
   final DateTime updatedAt;
   final bool isActive;
   final String? phoneNumber;
+  final String civilId;
+  final String? fileNumber;
+  final String? workingPlace;
 
   UserCredentials({
     required this.id,
@@ -20,6 +23,9 @@ abstract class UserCredentials {
     required this.updatedAt,
     this.isActive = true,
     this.phoneNumber,
+    this.fileNumber,
+    required this.civilId,
+    this.workingPlace,
   });
 
   // Abstract methods to be implemented by subclasses
