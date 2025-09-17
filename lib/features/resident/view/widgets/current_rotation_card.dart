@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:ophth_board/core/views/widgets/custom_bottom_sheet.dart';
 import 'package:ophth_board/features/rotation/model/rotation.dart';
 
 import '../../../evaluations/view/resident_evaluation_form_view.dart';
-import '../../../rotation/view/rotation_screen.dart';
+import '../../../rotation/view/rotation_details_screen.dart';
 
 class CurrentRotationCard extends StatelessWidget {
   final Rotation rotation;
@@ -23,10 +24,9 @@ class CurrentRotationCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => RotationDetailsPage(rotation: rotation),
-            ),
+          CustomBottomSheet.show(
+            context: context,
+            child: RotationDetailsPage(rotation: rotation),
           );
         },
         child: Padding(

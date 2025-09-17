@@ -54,7 +54,6 @@ class _ResidentEvaluationFormViewState
     notifier.updateEvaluationField(widget.residentName, 'residentName');
     notifier.updateEvaluationField(widget.rotationName, 'rotationName');
     notifier.updateEvaluationField(widget.supervisorName, 'supervisorName');
-    
   }
 
   @override
@@ -147,7 +146,6 @@ class _ResidentEvaluationFormViewState
 
     if (evaluation == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Resident Evaluation')),
         body: const Center(
           child: Text('Failed to load evaluation form. Please try again.'),
         ),
@@ -155,19 +153,7 @@ class _ResidentEvaluationFormViewState
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF2C3E50),
-        foregroundColor: Colors.white,
-        title: const Text('Evaluate Resident'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-        elevation: 0,
-      ),
+
       body: Column(
         children: [
           _buildProgressHeader(),
@@ -673,7 +659,7 @@ class _OverallAndCommentsPage extends ConsumerWidget {
                     color: Color(0xFF2C3E50),
                   ),
                 ),
-                
+
                 const SizedBox(height: 8),
                 Text(
                   'Auto-calculated based on category averages',

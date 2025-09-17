@@ -4,6 +4,7 @@ import 'package:ophth_board/features/leave_request/model/leave_request.dart';
 
 import '../../../../core/models/user.dart';
 import '../../../../core/providers/auth_provider.dart';
+import '../../../../core/views/widgets/custom_bottom_sheet.dart';
 import '../../../leave_request/provider/leave_request_provider.dart';
 import '../../../leave_request/view/leave_details_screen.dart';
 import '../../../leave_request/view/widgets/leave_list_card.dart';
@@ -102,11 +103,9 @@ class SupervisorAnnualLeavesListCard extends ConsumerWidget {
                           }
                         : null,
                     onViewDetails: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              LeaveDetailsScreen(leaveRequest: leaveRequest),
-                        ),
+                      CustomBottomSheet.show(
+                        context: context,
+                        child: LeaveDetailsScreen(leaveRequest: leaveRequest),
                       );
                     },
                   );

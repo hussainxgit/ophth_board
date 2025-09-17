@@ -6,6 +6,7 @@ import 'package:ophth_board/features/leave_request/view/leave_details_screen.dar
 
 import '../../../core/models/user.dart';
 import '../../../core/providers/auth_provider.dart';
+import '../../../core/views/widgets/custom_bottom_sheet.dart';
 import '../view/widgets/leave_list_card.dart';
 
 class LeaveListScreen extends ConsumerWidget {
@@ -116,11 +117,10 @@ class LeaveListScreen extends ConsumerWidget {
                               }
                             : null,
                         onViewDetails: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => LeaveDetailsScreen(
-                                leaveRequest: leaveRequest,
-                              ),
+                          CustomBottomSheet.show(
+                            context: context,
+                            child: LeaveDetailsScreen(
+                              leaveRequest: leaveRequest,
                             ),
                           );
                         },

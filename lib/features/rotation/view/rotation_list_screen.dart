@@ -4,42 +4,29 @@ import 'package:ophth_board/core/models/user.dart';
 import 'package:ophth_board/core/providers/auth_provider.dart';
 import 'package:ophth_board/features/rotation/model/rotation.dart';
 import 'package:ophth_board/features/rotation/providers/rotation_provider.dart';
-import '../../../core/views/widgets/bottom_sheet.dart';
+import '../../../core/views/widgets/custom_bottom_sheet.dart';
 import 'forms/create_rotation_form.dart';
 import 'widgets/rotation_list_card.dart';
-import 'rotation_screen.dart';
+import 'rotation_details_screen.dart';
 
 class RotationListScreen extends ConsumerWidget {
-  final String? residentId;
-  final String? supervisorId;
-  final String title;
-
-  const RotationListScreen({
-    super.key,
-    this.residentId,
-    this.supervisorId,
-    this.title = 'Rotations',
-  });
+  const RotationListScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUser = ref.watch(currentUserProvider);
 
-    final provider = residentId != null
-        ? residentRotationsProvider(residentId!)
-        : (supervisorId != null
-              ? supervisorActiveRotationsProvider(supervisorId!)
-              : (currentUser?.role == UserRole.resident
-                    ? residentRotationsProvider(currentUser!.id)
-                    : supervisorActiveRotationsProvider(currentUser!.id)));
+    final provider = currentUser?.role == UserRole.supervisor
+        ? supervisorActiveRotationsProvider(currentUser!.id)
+        : residentRotationsProvider(currentUser!.id);
 
     final rotationsAsync = ref.watch(provider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text('Rotations'),
         actions: [
-          currentUser?.role == UserRole.supervisor
+          currentUser.role == UserRole.supervisor
               ? IconButton(
                   icon: const Icon(Icons.add),
                   onPressed: () {
@@ -65,11 +52,12 @@ class RotationListScreen extends ConsumerWidget {
                       return RotationListCard(
                         rotation: rotation,
                         onView: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  RotationDetailsPage(rotation: rotation),
-                            ),
+                          CustomBottomSheet.show(
+                            context: context,
+                            child: RotationDetailsPage(rotation: rotation),
+                            backgroundColor: Colors.white,
+                            borderRadius: 20,
+                            showDragHandle: true,
                           );
                         },
                       );

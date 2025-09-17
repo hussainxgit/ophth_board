@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ophth_board/core/views/widgets/custom_bottom_sheet.dart';
 import 'package:ophth_board/features/leave_request/view/forms/annual_leave_request_form.dart';
 import 'package:ophth_board/features/resident/model/resident.dart';
 import 'package:ophth_board/features/resident/view/widgets/annual_leaves_list_card.dart';
@@ -112,11 +113,10 @@ class ResidentProfileScreen extends ConsumerWidget {
                               onApprove: null,
                               onReject: null,
                               onViewDetails: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => LeaveDetailsScreen(
-                                      leaveRequest: leaveRequest,
-                                    ),
+                                CustomBottomSheet.show(
+                                  context: context,
+                                  child: LeaveDetailsScreen(
+                                    leaveRequest: leaveRequest,
                                   ),
                                 );
                               },

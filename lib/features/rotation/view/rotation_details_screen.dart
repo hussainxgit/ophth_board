@@ -6,7 +6,7 @@ import 'package:ophth_board/features/evaluations/provider/resident_evaluation_pr
 
 import '../../../core/models/user.dart';
 import '../../../core/providers/auth_provider.dart';
-import '../../../core/views/widgets/bottom_sheet.dart';
+import '../../../core/views/widgets/custom_bottom_sheet.dart';
 import 'forms/create_rotation_form.dart';
 import '../../evaluations/view/resident_evaluation_form_view.dart';
 import '../../evaluations/view/resident_evaluation_result_screen.dart';
@@ -35,19 +35,11 @@ class RotationDetailsPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text('Rotation Details'),
+        leading: SizedBox.shrink(),
         actions: [
           if (isSupervisor)
             IconButton(
-              icon: Icon(
-                Icons.edit,
-                color: Theme.of(context).colorScheme.surfaceContainer,
-              ),
+              icon: Icon(Icons.edit),
               onPressed: () async {
                 // Show the custom bottom sheet with the CreateRotationForm in edit mode
                 await CustomBottomSheet.show(
@@ -316,28 +308,25 @@ class RotationDetailsPage extends ConsumerWidget {
         TextButton(
           onPressed: evaluationId != null
               ? () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EvaluationResultsScreen(
-                        evaluationId: evaluationId,
-                        residentName: name,
-                        residentLevel: 'Ophthalmology Resident - Year $title',
-                      ),
+                  CustomBottomSheet.show(
+                    context: context,
+                    child: EvaluationResultsScreen(
+                      evaluationId: evaluationId,
+                      residentName: name,
+                      residentLevel: 'Ophthalmology Resident - Year $title',
                     ),
                   );
                 }
               : () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ResidentEvaluationFormView(
-                        residentName: name,
-                        rotationId: rotation.id,
-                        supervisorId: supervisorId,
-                        residentId: rotation.assignedResidents.keys.first,
-                        supervisorName: rotation.assignedSupervisors.keys.first,
-                        rotationName: rotation.title,
-                      ),
+                  CustomBottomSheet.show(
+                    context: context,
+                    child: ResidentEvaluationFormView(
+                      residentName: name,
+                      rotationId: rotation.id,
+                      supervisorId: supervisorId,
+                      residentId: rotation.assignedResidents.keys.first,
+                      supervisorName: rotation.assignedSupervisors.keys.first,
+                      rotationName: rotation.title,
                     ),
                   );
                 },

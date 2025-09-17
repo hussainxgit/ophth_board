@@ -40,13 +40,6 @@ class EvaluationResultsScreen extends ConsumerWidget {
           },
         ),
 
-        appBar: AppBar(
-          title: Text('Evaluation Results'),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ),
         body: evaluation.when(
           data: (evaluation) {
             if (evaluation == null) {

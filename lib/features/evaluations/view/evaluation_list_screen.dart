@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ophth_board/core/views/widgets/custom_bottom_sheet.dart';
 import 'package:ophth_board/features/evaluations/model/resident_evaluation/resident_evaluation.dart';
 import 'package:ophth_board/features/evaluations/provider/resident_evaluation_provider.dart';
 import 'resident_evaluation_result_screen.dart';
@@ -58,30 +59,26 @@ class EvaluationListScreen extends ConsumerWidget {
                         evaluation: evaluation,
                         onView: () {
                           if (evaluation.id != null) {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => EvaluationResultsScreen(
-                                  evaluationId: evaluation.id!,
-                                  residentName:
-                                      evaluation.residentName.isNotEmpty
-                                      ? evaluation.residentName
-                                      : 'Resident',
-                                  residentLevel:
-                                      evaluation.trainingLevelDisplay,
-                                ),
+                            CustomBottomSheet.show(
+                              context: context,
+                              child: EvaluationResultsScreen(
+                                evaluationId: evaluation.id!,
+                                residentName: evaluation.residentName.isNotEmpty
+                                    ? evaluation.residentName
+                                    : 'Resident',
+                                residentLevel: evaluation.trainingLevelDisplay,
                               ),
                             );
                           } else {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => ResidentEvaluationFormView(
-                                  residentName: evaluation.residentName,
-                                  rotationId: evaluation.rotationId,
-                                  supervisorId: evaluation.supervisorId,
-                                  residentId: evaluation.residentId,
-                                  supervisorName: evaluation.supervisorName,
-                                  rotationName: evaluation.rotationTitle,
-                                ),
+                            CustomBottomSheet.show(
+                              context: context,
+                              child: ResidentEvaluationFormView(
+                                residentName: evaluation.residentName,
+                                rotationId: evaluation.rotationId,
+                                supervisorId: evaluation.supervisorId,
+                                residentId: evaluation.residentId,
+                                supervisorName: evaluation.supervisorName,
+                                rotationName: evaluation.rotationTitle,
                               ),
                             );
                           }
