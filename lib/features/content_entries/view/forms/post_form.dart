@@ -301,17 +301,34 @@ class _PostFormState extends ConsumerState<PostForm> {
   }
 
   Widget _buildSubmitButton() {
-    return AsyncLoadingButton(
-      buttonText: widget.post != null ? 'Update Post' : 'Create Post',
+    return AsyncGenericButton(
+      text: widget.post != null ? 'Update Post' : 'Create Post',
       onPressed: _submitForm,
-      // AsyncLoadingButton will use the success message from Result.success if available,
-      // or this static one. Since we return Result.success(null), this message will be shown.
-      successMessage: widget.post != null
-          ? 'Post updated successfully!'
-          : 'Post created successfully!',
-      // AsyncLoadingButton will use errorMessage from Result.failure if provided,
-      // otherwise this static one.
-      errorMessage: 'An error occurred. Please try again.',
+      onSuccess: (result) {
+        _showSuccessMessage(
+          widget.post != null
+              ? 'Post updated successfully!'
+              : 'Post created successfully!',
+        );
+        if (context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      onError: (error) {
+        _showErrorMessage('Error: $error');
+      },
     );
+  }
+
+  void _showSuccessMessage(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }

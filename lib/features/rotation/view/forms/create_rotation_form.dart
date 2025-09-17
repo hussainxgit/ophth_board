@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ophth_board/core/views/widgets/async_loading_button.dart';
 import '../../model/rotation.dart';
 import '../../../resident/model/resident.dart';
 import '../../../supervisor/model/supervisor.dart';
@@ -260,9 +261,12 @@ class _CreateRotationFormState extends ConsumerState<CreateRotationForm> {
             ),
 
             const SizedBox(height: 16),
-            ElevatedButton(
+            AsyncGenericButton(
+              text: isEditing ? 'Update Rotation' : 'Create Rotation',
               onPressed: _submit,
-              child: Text(isEditing ? 'Save Changes' : 'Create Rotation'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+              ),
             ),
           ],
         ),

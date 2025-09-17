@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ophth_board/core/views/widgets/async_loading_button.dart';
 import 'package:ophth_board/features/evaluations/model/resident_evaluation/resident_evaluation.dart';
 import 'package:ophth_board/features/pdf/controller/pdf_controller.dart';
 import '../model/resident_evaluation/evaluation_category.dart';
@@ -335,22 +336,14 @@ class EvaluationResultsScreen extends ConsumerWidget {
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
+          child: AsyncGenericButton(
+            text: 'Share Results',
+            onPressed: () async {
+              _shareResults(context);
+            },
+            icon: const Icon(Icons.share),
             style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.primary,
-              foregroundColor: theme.colorScheme.onPrimary,
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text(
-              'Done',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onPrimary,
-                fontWeight: FontWeight.w500,
-              ),
             ),
           ),
         ),

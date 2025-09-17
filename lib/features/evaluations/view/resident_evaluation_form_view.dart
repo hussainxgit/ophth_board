@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ophth_board/core/views/widgets/async_loading_button.dart';
 import 'package:ophth_board/features/evaluations/model/resident_evaluation/evaluation_category.dart';
 import 'package:ophth_board/features/evaluations/model/resident_evaluation/resident_evaluation_enums.dart';
 import 'package:ophth_board/features/evaluations/provider/resident_evaluation_provider.dart';
@@ -319,33 +320,24 @@ class _ResidentEvaluationFormViewState
             ),
           if (_currentPage > 0) const SizedBox(width: 16),
           Expanded(
-            child: ElevatedButton(
-              onPressed: _isSubmitting ? null : _nextPage,
+            child: AsyncGenericButton(
+              text: _isLastPage ? 'Submit' : 'Next',
+              onPressed: () async {
+                _nextPage;
+              },
+              enabled: !_isSubmitting,
+              loadingWidget: const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2C3E50),
-                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                elevation: 0,
+                backgroundColor: const Color(0xFF2C3E50),
               ),
-              child: _isSubmitting
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : Text(
-                      _isLastPage ? 'Submit' : 'Next Step',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
             ),
           ),
         ],

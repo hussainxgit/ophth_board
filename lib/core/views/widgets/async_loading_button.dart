@@ -1,90 +1,86 @@
 import 'package:flutter/material.dart';
 
-class AsyncLoadingButton extends StatefulWidget {
-  final Future<void> Function() onPressed;
-  final String buttonText;
-  final String successMessage;
-  final String errorMessage;
+class AsyncGenericButton<T> extends StatefulWidget {
+  final String text;
+  final Future<T> Function() onPressed;
+  final void Function(T result)? onSuccess;
+  final void Function(dynamic error)? onError;
+  final Widget? icon;
+  final ButtonStyle? style;
+  final bool enabled;
+  final Widget? loadingWidget;
+  final Duration? timeout;
 
-  const AsyncLoadingButton({
+  const AsyncGenericButton({
     super.key,
+    required this.text,
     required this.onPressed,
-    this.buttonText = 'Submit',
-    this.successMessage = 'Success!',
-    this.errorMessage = 'Error occurred',
+    this.onSuccess,
+    this.onError,
+    this.icon,
+    this.style,
+    this.enabled = true,
+    this.loadingWidget,
+    this.timeout,
   });
 
   @override
-  State<AsyncLoadingButton> createState() => _AsyncLoadingButtonState();
+  State<AsyncGenericButton<T>> createState() => _AsyncGenericButtonState<T>();
 }
 
-class _AsyncLoadingButtonState extends State<AsyncLoadingButton> {
+class _AsyncGenericButtonState<T> extends State<AsyncGenericButton<T>> {
   bool _isLoading = false;
-  String? _message;
-  bool _isError = false;
 
-  void _handlePress() async {
-    setState(() {
-      _isLoading = true;
-      _message = null;
-      _isError = false;
-    });
+  Future<void> _handlePress() async {
+    if (_isLoading || !widget.enabled) return;
+
+    setState(() => _isLoading = true);
 
     try {
-      await widget.onPressed();
-      setState(() {
-        _isLoading = false;
-        _message = widget.successMessage;
-        _isError = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _message = widget.errorMessage;
-        _isError = true;
-      });
-    }
+      final Future<T> operation = widget.timeout != null
+          ? widget.onPressed().timeout(widget.timeout!)
+          : widget.onPressed();
 
-    // Clear message after 2 seconds
-    if (_message != null) {
-      await Future.delayed(const Duration(seconds: 2));
+      final T result = await operation;
+
       if (mounted) {
-        setState(() {
-          _message = null;
-        });
+        widget.onSuccess?.call(result);
+      }
+    } catch (error) {
+      if (mounted) {
+        widget.onError?.call(error);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ElevatedButton(
-          onPressed: _isLoading ? null : _handlePress,
-          child: _isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-              : Text(widget.buttonText),
-        ),
-        if (_message != null) ...[
-          const SizedBox(height: 8),
-          Text(
-            _message!,
-            style: TextStyle(
-              color: _isError ? Colors.red : Colors.green,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ],
+    final Widget child = _isLoading
+        ? widget.loadingWidget ??
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+        : widget.icon != null
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              widget.icon!,
+              const SizedBox(width: 8),
+              Text(widget.text),
+            ],
+          )
+        : Text(widget.text);
+
+    return ElevatedButton(
+      onPressed: _isLoading || !widget.enabled ? null : _handlePress,
+      style: widget.style,
+      child: child,
     );
   }
 }

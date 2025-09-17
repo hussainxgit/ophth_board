@@ -273,15 +273,22 @@ class _NoticeBoardFormState extends ConsumerState<NoticeBoardForm> {
   }
 
   Widget _buildSubmitButton() {
-    return AsyncLoadingButton(
-      buttonText: widget.noticeBoard != null
-          ? 'Update Notice'
-          : 'Create Notice',
+    return AsyncGenericButton(
+      text: widget.noticeBoard != null ? 'Update Notice' : 'Create Notice',
       onPressed: _submitForm,
-      successMessage: widget.noticeBoard != null
-          ? 'Notice board updated successfully!'
-          : 'Notice board created successfully!',
-      errorMessage: 'Error submitting form. Please try again.',
+      onSuccess: (result) {
+        _showSuccessMessage(
+          widget.noticeBoard != null
+              ? 'Notice updated successfully!'
+              : 'Notice created successfully!',
+        );
+        if (context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      onError: (error) {
+        _showErrorMessage('Error: $error');
+      },
     );
   }
 }

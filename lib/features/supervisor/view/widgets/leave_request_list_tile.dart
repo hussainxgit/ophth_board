@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ophth_board/core/utils/boali_date_extenstions.dart';
+import 'package:ophth_board/core/views/widgets/async_loading_button.dart';
 
 import '../../../leave_request/model/leave_request.dart';
 
@@ -163,11 +164,16 @@ class LeaveRequestTile extends StatelessWidget {
             ],
           ),
         ),
-        ElevatedButton(
-          onPressed: () {
+        AsyncGenericButton(
+          text: 'Approve',
+          onPressed: () async {
             onApprove?.call();
+            return;
           },
-          child: const Text('Approve'),
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(100, 36),
+          ),
+          icon: const Icon(Icons.check, size: 16),
         ),
       ],
     );

@@ -217,15 +217,14 @@ class _AnnouncementFormState extends ConsumerState<AnnouncementForm> {
   }
 
   Widget _buildSubmitButton() {
-    return AsyncLoadingButton(
-      buttonText: widget.announcement != null
+    return AsyncGenericButton(
+      text: widget.announcement != null
           ? 'Update Announcement'
           : 'Create Announcement',
       onPressed: _submitForm,
-      successMessage: widget.announcement != null
-          ? 'Announcement updated successfully!'
-          : 'Announcement created successfully!',
-      errorMessage: 'Error submitting form. Please try again.',
+      onError: (error) {
+        _showErrorMessage('Error: $error');
+      },
     );
   }
 }

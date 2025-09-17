@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ophth_board/core/providers/auth_provider.dart';
+import 'package:ophth_board/core/views/widgets/async_loading_button.dart';
 import 'package:ophth_board/features/leave_request/model/leave_request.dart';
 import 'package:ophth_board/features/leave_request/provider/leave_request_provider.dart';
 import 'package:ophth_board/features/supervisor/repositories/supervisor_repository.dart';
@@ -328,34 +329,23 @@ class _AnnualLeaveRequestFormState
                     SizedBox(
                       width: double.infinity,
                       height: 50,
-                      child: ElevatedButton(
-                        onPressed: _isSubmitting ? null : _submitRequest,
+                      child: AsyncGenericButton(
+                        text: 'Submit Request',
+                        onPressed: _submitRequest,
+                        enabled: !_isSubmitting,
+                        loadingWidget: const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: theme.primaryColor,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          elevation: 2,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        child: _isSubmitting
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
-                                  ),
-                                ),
-                              )
-                            : const Text(
-                                'Submit Leave Request',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
                       ),
                     ),
 

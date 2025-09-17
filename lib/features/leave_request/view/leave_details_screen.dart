@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:ophth_board/core/views/widgets/async_loading_button.dart';
 import '../model/leave_request.dart';
 import '../../pdf/controller/pdf_controller.dart';
 
@@ -240,15 +241,21 @@ class LeaveDetailsScreen extends ConsumerWidget {
             Center(
               child: !leaveRequest.isApproved()
                   ? const SizedBox.shrink()
-                  : ElevatedButton(
-                      child: const Text('View Leave (PDF)'),
+                  : AsyncGenericButton(
+                      text: 'View as PDF',
                       onPressed: () async {
-                        // Fill the leave PDF and open viewer
                         await PdfController().fillAndViewLeaveForm(
                           context,
                           leaveRequest,
                         );
                       },
+                      icon: const Icon(Icons.picture_as_pdf),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
+                      ),
                     ),
             ),
           ],

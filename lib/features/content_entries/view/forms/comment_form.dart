@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ophth_board/core/providers/auth_provider.dart';
+import 'package:ophth_board/core/views/widgets/async_loading_button.dart';
 import '../../model/comment_data.dart';
 
 class CommentForm extends ConsumerStatefulWidget {
@@ -116,19 +117,18 @@ class _CommentFormState extends ConsumerState<CommentForm> {
             },
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _isSubmitting ? null : _submitComment,
-            child: _isSubmitting
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(
-                    widget.editingComment != null
-                        ? 'Update Comment'
-                        : 'Add Comment',
-                  ),
+          AsyncGenericButton(
+            text: widget.editingComment != null ? 'Update Comment' : 'Add Comment',
+            onPressed: _submitComment,
+            enabled: !_isSubmitting,
+            loadingWidget: const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
           ),
         ],
       ),

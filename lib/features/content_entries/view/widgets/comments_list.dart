@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ophth_board/core/views/widgets/async_loading_button.dart';
 import '../../model/comment_data.dart';
 import '../../providers/comment_provider.dart';
 import 'comment_item.dart';
@@ -90,9 +91,15 @@ class CommentsList extends ConsumerWidget {
                     style: const TextStyle(color: Colors.red),
                   ),
                   const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: () => ref.read(commentProvider(params).notifier).refresh(),
-                    child: const Text('Retry'),
+                  AsyncGenericButton(
+                    text: 'Retry',
+                    onPressed: () async {
+                      ref.read(commentProvider(params).notifier).refresh();
+                    },
+                    icon: const Icon(Icons.refresh),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    ),
                   ),
                 ],
               ),
