@@ -2,16 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ophth_board/core/views/widgets/async_loading_button.dart';
+import '../../resident/providers/resident_provider.dart';
 import '../model/leave_request.dart';
 import '../../pdf/controller/pdf_controller.dart';
 
 class LeaveDetailsScreen extends ConsumerWidget {
   final LeaveRequest leaveRequest;
 
-  const LeaveDetailsScreen({super.key, required this.leaveRequest});
+  const LeaveDetailsScreen({
+    super.key,
+    required this.leaveRequest,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final resident = ref.watch(getResidentByIdProvider(leaveRequest.residentId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
@@ -247,6 +252,7 @@ class LeaveDetailsScreen extends ConsumerWidget {
                         await PdfController().fillAndViewLeaveForm(
                           context,
                           leaveRequest,
+                          resident.value!,
                         );
                       },
                       icon: const Icon(Icons.picture_as_pdf),

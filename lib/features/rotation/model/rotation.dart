@@ -1,7 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ophth_board/features/resident/model/resident.dart';
-
-import '../../supervisor/model/supervisor.dart';
 
 class Rotation {
   final String id;
@@ -10,12 +7,10 @@ class Rotation {
   final DateTime startDate;
   final DateTime endDate;
   final String status;
-  final Map<String, bool> assignedResidents; // residentId -> true
-  final Map<String, bool> assignedSupervisors; // supervisorId -> true
+  final List<String> assignedResidents; // list of residentIds
+  final List<String> assignedSupervisors; // list of supervisorIds
   final DateTime createdAt;
   final DateTime updatedAt;
-  final List<Resident> assignedResidentsDetails;
-  final List<Supervisor> assignedSupervisorsDetails;
 
 
   const Rotation({
@@ -25,12 +20,10 @@ class Rotation {
     required this.startDate,
     required this.endDate,
     required this.status,
-    required this.assignedResidents,
-    required this.assignedSupervisors,
+  required this.assignedResidents,
+  required this.assignedSupervisors,
     required this.createdAt,
     required this.updatedAt,
-    this.assignedResidentsDetails = const [],
-    this.assignedSupervisorsDetails = const [],
   });
 
   // Factory constructor to create Rotation from Firestore document
@@ -43,32 +36,39 @@ class Rotation {
       description: data['description'] ?? '',
       startDate: (data['startDate'] as Timestamp).toDate(),
       endDate: (data['endDate'] as Timestamp).toDate(),
-      assignedResidents: _convertToMap(data['assignedResidents']),
-      assignedSupervisors: _convertToMap(data['assignedSupervisors']),
+      assignedResidents: _convertToList(data['assignedResidents']),
+      assignedSupervisors: _convertToList(data['assignedSupervisors']),
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
       status: data['status'] ?? '',
     );
   }
-  // Helper method to convert Firebase array format to Map
-  static Map<String, bool> _convertToMap(dynamic value) {
-    if (value == null) return {};
+
+  // Helper to convert Firebase stored value to List<String>
+  static List<String> _convertToList(dynamic value) {
+    if (value == null) return [];
     if (value is List) {
-      // Handle array format: [{key: value}, {key2: value2}]
-      final Map<String, bool> result = {};
+      // If stored as list of ids or list of maps
+      final List<String> result = [];
       for (final item in value) {
-        if (item is Map<String, dynamic>) {
+        if (item is String) {
+          result.add(item);
+        } else if (item is Map<String, dynamic>) {
+          // maybe map like {id: true}
           item.forEach((key, val) {
-            result[key] = val == true;
+            if (val == true) result.add(key);
           });
         }
       }
       return result;
     } else if (value is Map<String, dynamic>) {
-      // Handle direct map format: {key: value, key2: value2}
-      return Map<String, bool>.from(value);
+      // previously stored as map id->true
+      return value.entries
+          .where((e) => e.value == true)
+          .map((e) => e.key)
+          .toList();
     }
-    return {};
+    return [];
   }
 
   // Method to convert Rotation to Firestore document
@@ -78,8 +78,9 @@ class Rotation {
       'description': description,
       'startDate': Timestamp.fromDate(startDate),
       'endDate': Timestamp.fromDate(endDate),
-      'assignedResidents': assignedResidents,
-      'assignedSupervisors': assignedSupervisors,
+      // store as map for backwards compatibility and efficient queries
+      'assignedResidents': {for (var id in assignedResidents) id: true},
+      'assignedSupervisors': {for (var id in assignedSupervisors) id: true},
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(DateTime.now()),
       'status': status,

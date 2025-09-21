@@ -62,14 +62,8 @@ class _CreateRotationFormState extends ConsumerState<CreateRotationForm> {
       _descCtl.text = r.description;
       _startDate = r.startDate;
       _endDate = r.endDate;
-      _selectedResidentIds.addAll(
-        r.assignedResidents.keys.where((k) => r.assignedResidents[k] == true),
-      );
-      _selectedSupervisorIds.addAll(
-        r.assignedSupervisors.keys.where(
-          (k) => r.assignedSupervisors[k] == true,
-        ),
-      );
+      _selectedResidentIds.addAll(r.assignedResidents);
+      _selectedSupervisorIds.addAll(r.assignedSupervisors);
     }
   }
 
@@ -116,11 +110,9 @@ class _CreateRotationFormState extends ConsumerState<CreateRotationForm> {
 
     final now = DateTime.now();
 
-    // Convert selected ids to Map<String,bool> for storage
+    // Convert selected ids to Map<String,bool> for storage (firestore shape)
     final assignedResidents = {for (var id in _selectedResidentIds) id: true};
-    final assignedSupervisors = {
-      for (var id in _selectedSupervisorIds) id: true,
-    };
+    final assignedSupervisors = {for (var id in _selectedSupervisorIds) id: true};
 
     // Build rotation object (preserve id/createdAt when editing)
     final initial = widget.initialRotation;
@@ -131,8 +123,9 @@ class _CreateRotationFormState extends ConsumerState<CreateRotationForm> {
       startDate: _startDate!,
       endDate: _endDate!,
       status: initial?.status ?? 'scheduled',
-      assignedResidents: assignedResidents,
-      assignedSupervisors: assignedSupervisors,
+      // Rotation model now expects lists of ids
+      assignedResidents: assignedResidents.keys.toList(),
+      assignedSupervisors: assignedSupervisors.keys.toList(),
       createdAt: initial?.createdAt ?? now,
       updatedAt: now,
     );

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ophth_board/core/views/widgets/custom_bottom_sheet.dart';
 import 'package:ophth_board/features/rotation/model/rotation.dart';
-
-import '../../../evaluations/view/resident_evaluation_form_view.dart';
 import '../../../rotation/view/rotation_details_screen.dart';
+import '../../../supervisor/model/supervisor.dart';
+import '../../../../core/firebase/firebase_service.dart';
 
-class CurrentRotationCard extends StatelessWidget {
+class CurrentRotationCard extends ConsumerWidget {
   final Rotation rotation;
   final String residentId;
   final String residentName;
@@ -18,7 +19,7 @@ class CurrentRotationCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -49,16 +50,22 @@ class CurrentRotationCard extends StatelessWidget {
                   ),
                 ],
               ),
-
               const SizedBox(height: 12),
-
               // Rotation Details
-              _buildDetailRow(
-                'Supervisor:',
-                rotation.assignedSupervisors.isEmpty
-                    ? 'Not Assigned'
-                    : rotation.assignedSupervisors.keys.first,
-              ),
+              rotation.assignedSupervisors.isEmpty
+                  ? _buildDetailRow('Supervisor:', 'Not Assigned')
+                  : FutureBuilder<Supervisor?>(
+                      future: _fetchSupervisor(ref, rotation.assignedSupervisors.first),
+                      builder: (context, AsyncSnapshot<Supervisor?> snap) {
+                        if (snap.connectionState == ConnectionState.waiting) {
+                          return _buildDetailRow('Supervisor:', 'Loading...');
+                        }
+                        if (!snap.hasData || snap.data == null) {
+                          return _buildDetailRow('Supervisor:', 'Not Assigned');
+                        }
+                        return _buildSupervisorDetail(context, snap.data!);
+                      },
+                    ),
               const SizedBox(height: 8),
               _buildDetailRow(
                 'Duration:',
@@ -114,5 +121,60 @@ class CurrentRotationCard extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildSupervisorDetail(BuildContext context, Supervisor supervisor) {
+    // supervisor is expected to have firstName, lastName and possibly profileImageUrl
+    final name = '${supervisor.firstName} ${supervisor.lastName}';
+    final title = supervisor.workingPlace ?? '';
+
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 20,
+      backgroundImage: supervisor.profileImageUrl != null
+        ? NetworkImage(supervisor.profileImageUrl!)
+              : null,
+          child: supervisor.profileImageUrl == null
+              ? Icon(
+                  Icons.person,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.surface,
+                )
+              : null,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              if (title.isNotEmpty)
+                Text(
+                  title,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<Supervisor?> _fetchSupervisor(WidgetRef ref, String supervisorId) async {
+    try {
+      final firestore = ref.read(firestoreServiceProvider);
+      final doc = await firestore.getDocument('users', supervisorId);
+      if (!doc.exists) return null;
+      return Supervisor.fromFirestore(doc);
+    } catch (e) {
+      return null;
+    }
   }
 }

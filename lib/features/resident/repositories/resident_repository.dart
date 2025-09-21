@@ -59,6 +59,22 @@ class ResidentRepository {
       throw 'Error fetching getResidentsById: $e';
     }
   }
+
+  Future<Resident?> getResidentById(String id) async {
+    try {
+      final docSnapshot = await _firestoreService.getDocument(
+        _collectionPath,
+        id,
+      );
+      if (docSnapshot.exists) {
+        return Resident.fromFirestore(docSnapshot);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      throw 'Error fetching resident by ID: $e';
+    }
+  }
 }
 
 final residentRepositoryProvider = Provider<ResidentRepository>((ref) {

@@ -49,7 +49,7 @@ class RotationRepository {
       return rotations
           .where(
             (rotation) =>
-                rotation.assignedResidents[residentId] == true &&
+                rotation.assignedResidents.contains(residentId) &&
                 rotation.startDate.isBefore(now) &&
                 rotation.endDate.isAfter(now),
           )
@@ -63,9 +63,9 @@ class RotationRepository {
   Future<List<Rotation>> getRotationsForResident(String residentId) async {
     try {
       final rotations = await getAllRotations();
-      return rotations
-          .where((rotation) => rotation.assignedResidents[residentId] == true)
-          .toList();
+    return rotations
+      .where((rotation) => rotation.assignedResidents.contains(residentId))
+      .toList();
     } catch (e) {
       throw 'Error fetching rotations for resident: $e';
     }
@@ -76,13 +76,13 @@ class RotationRepository {
       final rotations = await getAllRotations();
       final now = DateTime.now();
 
-      return rotations
-          .where(
-            (rotation) =>
-                rotation.assignedResidents[residentId] == true &&
-                rotation.startDate.isAfter(now),
-          )
-          .toList();
+    return rotations
+      .where(
+      (rotation) =>
+        rotation.assignedResidents.contains(residentId) &&
+        rotation.startDate.isAfter(now),
+      )
+      .toList();
     } catch (e) {
       throw 'Error fetching upcoming rotations: $e';
     }
@@ -93,13 +93,13 @@ class RotationRepository {
       final rotations = await getAllRotations();
       final now = DateTime.now();
 
-      return rotations
-          .where(
-            (rotation) =>
-                rotation.assignedResidents[residentId] == true &&
-                rotation.endDate.isBefore(now),
-          )
-          .toList();
+    return rotations
+      .where(
+      (rotation) =>
+        rotation.assignedResidents.contains(residentId) &&
+        rotation.endDate.isBefore(now),
+      )
+      .toList();
     } catch (e) {
       throw 'Error fetching past rotations: $e';
     }
@@ -144,13 +144,13 @@ class RotationRepository {
   ) async {
     try {
       final rotations = await getAllRotations();
-      return rotations
-          .where(
-            (rotation) =>
-                rotation.assignedSupervisors[superviorId] == true &&
-                rotation.startDate.isStarted(),
-          )
-          .toList();
+    return rotations
+      .where(
+      (rotation) =>
+        rotation.assignedSupervisors.contains(superviorId) &&
+        rotation.startDate.isStarted(),
+      )
+      .toList();
     } catch (e) {
       throw 'Error fetching supervisor active rotations: $e';
     }

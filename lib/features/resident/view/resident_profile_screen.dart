@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ophth_board/core/views/widgets/custom_bottom_sheet.dart';
 import 'package:ophth_board/features/leave_request/view/forms/annual_leave_request_form.dart';
 import 'package:ophth_board/features/resident/model/resident.dart';
-import 'package:ophth_board/features/resident/view/widgets/annual_leaves_list_card.dart';
 import 'package:ophth_board/features/resident/view/widgets/resident_profile_header_card.dart';
 import 'package:ophth_board/features/resident/view/widgets/current_rotation_card.dart';
 

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:ophth_board/core/utils/boali_date_extenstions.dart';
 
 import '../../evaluations/model/resident_evaluation/resident_evaluation.dart';
 import '../../evaluations/model/resident_evaluation/resident_evaluation_enums.dart';
 import '../../leave_request/model/leave_request.dart';
+import '../../resident/model/resident.dart';
 import '../model/pdf_model.dart';
 import '../view/pdf_viewer_screen.dart';
 
@@ -48,8 +50,9 @@ class PdfController {
   Future<void> fillAndViewLeaveForm(
     BuildContext context,
     LeaveRequest leaveRequest,
+    Resident resident,
   ) async {
-    final formData = _buildLeaveFormData(leaveRequest);
+    final formData = _buildLeaveFormData(leaveRequest, resident);
     final template = 'assets/pdf_forms/resident_leave_request.pdf';
     await _fillAndShow(
       context,
@@ -179,15 +182,25 @@ class PdfController {
     return formData;
   }
 
-  Map<String, dynamic> _buildLeaveFormData(LeaveRequest leaveRequest) {
+  Map<String, dynamic> _buildLeaveFormData(
+    LeaveRequest leaveRequest,
+    Resident resident,
+  ) {
     // Map leave request fields to PDF form field names expected by template
+    print(
+      'Building form data for leave request: ${leaveRequest.id} and resident: ${resident.fullName} (${resident.civilId}) ',
+    );
     return {
-      'resident_name': leaveRequest.residentName,
+      'resident_name': resident.fullName,
+      'civil_id': resident.civilId,
+      'file_number': resident.fileNumber,
+      'working_place': resident.workingPlace,
+      'resident_level': 'PGY${resident.pgy}', // Assuming pgy
       'leave_type': 'annual', // Placeholder, adjust as needed
-      'leave_start_date': leaveRequest.startDate.toIso8601String(),
+      'leave_start_date': leaveRequest.startDate.formattedDate,
       'leave__total_days': leaveRequest.totalDays.toString(),
-      'leave_end_date': leaveRequest.endDate.toIso8601String(),
-      'status': leaveRequest.status.toDisplayString(),
+      'leave_end_date': leaveRequest.endDate.formattedDate,
+      'status': leaveRequest.status,
     };
   }
 }

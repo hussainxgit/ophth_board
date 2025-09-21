@@ -30,3 +30,8 @@ final getResidentsByIdProvider =
       final repository = ref.watch(residentRepositoryProvider);
       return repository.getResidentsById(residentIdList.ids);
     });
+final getResidentByIdProvider =
+    FutureProvider.family<Resident?, String>((ref, residentId) async {
+  final repository = ref.watch(residentRepositoryProvider);
+  return repository.getResidentById(residentId);
+});

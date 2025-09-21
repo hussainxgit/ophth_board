@@ -11,6 +11,7 @@ import 'forms/create_rotation_form.dart';
 import '../../evaluations/view/resident_evaluation_form_view.dart';
 import '../../evaluations/view/resident_evaluation_result_screen.dart';
 import '../../resident/providers/resident_provider.dart';
+import '../../supervisor/providers/supervisor_provider.dart';
 
 class RotationDetailsPage extends ConsumerWidget {
   final Rotation rotation;
@@ -20,9 +21,7 @@ class RotationDetailsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final getRotationResidentsDetailsProvider = ref.watch(
-      getResidentsByIdProvider(
-        ResidentIdList(rotation.assignedResidents.keys.toList()),
-      ),
+      getResidentsByIdProvider(ResidentIdList(rotation.assignedResidents)),
     );
     final evaluationsProvider = ref.watch(
       getAllEvaluationsForRotationProvider(rotation.id),
@@ -34,10 +33,10 @@ class RotationDetailsPage extends ConsumerWidget {
         UserRole.supervisor; // Adjust based on your role field
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: isSupervisor ?
+      AppBar(
         leading: SizedBox.shrink(),
         actions: [
-          if (isSupervisor)
             IconButton(
               icon: Icon(Icons.edit),
               onPressed: () async {
@@ -54,16 +53,10 @@ class RotationDetailsPage extends ConsumerWidget {
                   backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 );
               },
-            )
-          else
-            IconButton(
-              icon: Icon(
-                Icons.more_vert,
-                color: Theme.of(context).colorScheme.surfaceContainer,
-              ),
-              onPressed: () {},
             ),
         ],
+      ): AppBar(
+        leading: SizedBox.shrink(),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -114,7 +107,7 @@ class RotationDetailsPage extends ConsumerWidget {
                         Icon(Icons.group, size: 20),
                         const SizedBox(width: 8),
                         Text(
-                          '${rotation.assignedResidents.entries.length.toString()} residents',
+                          '${rotation.assignedResidents.length.toString()} residents',
                         ),
                       ],
                     ),
@@ -122,9 +115,6 @@ class RotationDetailsPage extends ConsumerWidget {
                 ),
               ),
             ),
-
-            const SizedBox(height: 24),
-
             // Timeline Card
             Card(
               child: Padding(
@@ -170,9 +160,78 @@ class RotationDetailsPage extends ConsumerWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 24),
 
+            // Assigned Supervisors Card
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Assigned Supervisors',
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final supAsync = ref.watch(
+                          getSupervisorsByIdProvider(
+                            SupervisorIdList(rotation.assignedSupervisors),
+                          ),
+                        );
+
+                        return supAsync.when(
+                          data: (sups) {
+                            if (sups.isEmpty) {
+                              return Text('No supervisors assigned');
+                            }
+                            return Column(
+                              children: sups
+                                  .map(
+                                    (s) => ListTile(
+                                      leading: CircleAvatar(
+                                        backgroundImage:
+                                            s.profileImageUrl != null
+                                            ? NetworkImage(s.profileImageUrl!)
+                                            : null,
+                                        child: s.profileImageUrl == null
+                                            ? Icon(
+                                                Icons.person,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.surfaceContainer,
+                                              )
+                                            : null,
+                                      ),
+                                      title: Text(
+                                        '${s.firstName} ${s.lastName}',
+                                      ),
+                                      subtitle: s.workingPlace != null
+                                          ? Text(s.workingPlace!)
+                                          : null,
+                                    ),
+                                  )
+                                  .toList(),
+                            );
+                          },
+                          loading: () =>
+                              const Center(child: CircularProgressIndicator()),
+                          error: (e, st) =>
+                              Text('Error loading supervisors: $e'),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
             // Assigned Residents Card
             Card(
               child: Padding(
@@ -187,10 +246,6 @@ class RotationDetailsPage extends ConsumerWidget {
                         Text(
                           'Assigned Residents',
                           style: Theme.of(context).textTheme.headlineMedium,
-                        ),
-                        Text(
-                          '${rotation.assignedResidents.entries.length.toString()} residents',
-                          style: Theme.of(context).textTheme.labelLarge,
                         ),
                       ],
                     ),
@@ -324,8 +379,12 @@ class RotationDetailsPage extends ConsumerWidget {
                       residentName: name,
                       rotationId: rotation.id,
                       supervisorId: supervisorId,
-                      residentId: rotation.assignedResidents.keys.first,
-                      supervisorName: rotation.assignedSupervisors.keys.first,
+                      residentId: rotation.assignedResidents.isNotEmpty
+                          ? rotation.assignedResidents.first
+                          : '',
+                      supervisorName: rotation.assignedSupervisors.isNotEmpty
+                          ? rotation.assignedSupervisors.first
+                          : '',
                       rotationName: rotation.title,
                     ),
                   );
