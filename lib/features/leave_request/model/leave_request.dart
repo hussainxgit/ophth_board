@@ -40,6 +40,8 @@ class LeaveRequest {
   final DateTime? approvedRejectedAt;
   final String? approverId;
   final String? supervisorComments;
+  final String? residentSignatureId;
+  final String? supervisorSignatureId;
 
   LeaveRequest({
     this.id,
@@ -54,6 +56,8 @@ class LeaveRequest {
     this.approvedRejectedAt,
     this.approverId,
     this.supervisorComments,
+    this.residentSignatureId,
+    this.supervisorSignatureId,
   });
 
   factory LeaveRequest.fromFirestore(DocumentSnapshot doc) {
@@ -71,6 +75,8 @@ class LeaveRequest {
       approvedRejectedAt: (data['approvedRejectedAt'] as Timestamp?)?.toDate(),
       approverId: data['approverId'] as String?,
       supervisorComments: data['supervisorComments'] as String?,
+      residentSignatureId: data['residentSignatureId'] as String?,
+      supervisorSignatureId: data['supervisorSignatureId'] as String?,
     );
   }
 
@@ -91,6 +97,8 @@ class LeaveRequest {
           : null,
       'approverId': approverId,
       'supervisorComments': supervisorComments,
+      'residentSignatureId': residentSignatureId,
+      'supervisorSignatureId': supervisorSignatureId,
     };
   }
 

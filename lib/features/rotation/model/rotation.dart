@@ -20,8 +20,8 @@ class Rotation {
     required this.startDate,
     required this.endDate,
     required this.status,
-  required this.assignedResidents,
-  required this.assignedSupervisors,
+    required this.assignedResidents,
+    required this.assignedSupervisors,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -29,7 +29,6 @@ class Rotation {
   // Factory constructor to create Rotation from Firestore document
   factory Rotation.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    print('Rotation data: $data');
     return Rotation(
       id: doc.id,
       title: data['title'] ?? '',
@@ -110,4 +109,5 @@ class Rotation {
     final totalDuration = endDate.difference(startDate).inDays;
     return (totalDuration / 7).ceil();
   }
+
 }

@@ -8,6 +8,7 @@ import '../../../../core/views/widgets/custom_bottom_sheet.dart';
 import '../../../leave_request/provider/leave_request_provider.dart';
 import '../../../leave_request/view/leave_details_screen.dart';
 import '../../../leave_request/view/widgets/leave_list_card.dart';
+import '../../../signatures/providers/signature_provider.dart';
 
 class SupervisorAnnualLeavesListCard extends ConsumerWidget {
   const SupervisorAnnualLeavesListCard({super.key});
@@ -29,6 +30,9 @@ class SupervisorAnnualLeavesListCard extends ConsumerWidget {
                     onApprove: currentUser.role == UserRole.supervisor
                         ? () async {
                             if (leaveRequest.id == null) return;
+                            final userSignature =
+                                await ref.read(userSignatureProvider.future);
+                            final supervisorSignatureId = userSignature?.id;
 
                             final result = await ref
                                 .read(leaveRequestOperationsProvider.notifier)
@@ -36,6 +40,7 @@ class SupervisorAnnualLeavesListCard extends ConsumerWidget {
                                   requestId: leaveRequest.id!,
                                   newStatus: LeaveStatus.approved,
                                   approverId: currentUser.id,
+                                  supervisorSignatureId: supervisorSignatureId,
                                 );
                             if (result.isSuccess) {
                               // Invalidate the provider to refresh the list

@@ -5,6 +5,7 @@ import '../../evaluations/model/resident_evaluation/resident_evaluation.dart';
 import '../../evaluations/model/resident_evaluation/resident_evaluation_enums.dart';
 import '../../leave_request/model/leave_request.dart';
 import '../../resident/model/resident.dart';
+import '../../signatures/model/signature.dart';
 import '../model/pdf_model.dart';
 import '../view/pdf_viewer_screen.dart';
 
@@ -50,9 +51,16 @@ class PdfController {
   Future<void> fillAndViewLeaveForm(
     BuildContext context,
     LeaveRequest leaveRequest,
-    Resident resident,
-  ) async {
-    final formData = _buildLeaveFormData(leaveRequest, resident);
+    Resident resident, {
+    Signature? residentSignature,
+    Signature? supervisorSignature,
+  }) async {
+    final formData = _buildLeaveFormData(
+      leaveRequest,
+      resident,
+      residentSignature: residentSignature,
+      supervisorSignature: supervisorSignature,
+    );
     final template = 'assets/pdf_forms/resident_leave_request.pdf';
     await _fillAndShow(
       context,
@@ -184,13 +192,12 @@ class PdfController {
 
   Map<String, dynamic> _buildLeaveFormData(
     LeaveRequest leaveRequest,
-    Resident resident,
-  ) {
+    Resident resident, {
+    Signature? residentSignature,
+    Signature? supervisorSignature,
+  }) {
     // Map leave request fields to PDF form field names expected by template
-    print(
-      'Building form data for leave request: ${leaveRequest.id} and resident: ${resident.fullName} (${resident.civilId}) ',
-    );
-    return {
+    final formData = {
       'resident_name': resident.fullName,
       'civil_id': resident.civilId,
       'file_number': resident.fileNumber,
@@ -200,7 +207,18 @@ class PdfController {
       'leave_start_date': leaveRequest.startDate.formattedDate,
       'leave__total_days': leaveRequest.totalDays.toString(),
       'leave_end_date': leaveRequest.endDate.formattedDate,
-      'status': leaveRequest.status,
+      'status': leaveRequest.status.toDisplayString(),
     };
+
+    // Add signature SVG data if available (stored in signatureStoragePath field)
+    if (residentSignature != null) {
+      formData['resident_signature'] = residentSignature.signatureStoragePath;
+    }
+
+    if (supervisorSignature != null) {
+      formData['supervisor_signature'] = supervisorSignature.signatureStoragePath;
+    }
+
+    return formData;
   }
 }

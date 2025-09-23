@@ -8,6 +8,7 @@ import '../../../core/models/user.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/views/widgets/custom_bottom_sheet.dart';
 import '../view/widgets/leave_list_card.dart';
+import '../../signatures/providers/signature_provider.dart';
 
 class LeaveListScreen extends ConsumerWidget {
   const LeaveListScreen({super.key});
@@ -36,6 +37,10 @@ class LeaveListScreen extends ConsumerWidget {
                         onApprove: currentUser.role == UserRole.supervisor
                             ? () async {
                                 if (leaveRequest.id == null) return;
+                                // Try to get supervisor's signature id, if any
+                                final userSignature =
+                                    await ref.read(userSignatureProvider.future);
+                                final supervisorSignatureId = userSignature?.id;
 
                                 final result = await ref
                                     .read(
@@ -45,6 +50,7 @@ class LeaveListScreen extends ConsumerWidget {
                                       requestId: leaveRequest.id!,
                                       newStatus: LeaveStatus.approved,
                                       approverId: currentUser.id,
+                                      supervisorSignatureId: supervisorSignatureId,
                                     );
                                 if (result.isSuccess) {
                                   // Invalidate the provider to refresh the list

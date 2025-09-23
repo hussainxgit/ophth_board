@@ -154,7 +154,6 @@ class _ResidentEvaluationFormViewState
     }
 
     return Scaffold(
-
       body: Column(
         children: [
           _buildProgressHeader(),
@@ -323,7 +322,7 @@ class _ResidentEvaluationFormViewState
             child: AsyncGenericButton(
               text: _isLastPage ? 'Submit' : 'Next',
               onPressed: () async {
-                _nextPage;
+                _nextPage();
               },
               enabled: !_isSubmitting,
               loadingWidget: const SizedBox(

@@ -6,6 +6,8 @@ import 'package:ophth_board/features/leave_request/model/leave_request.dart';
 import 'package:ophth_board/features/leave_request/provider/leave_request_provider.dart';
 import 'package:ophth_board/features/supervisor/repositories/supervisor_repository.dart';
 import 'package:ophth_board/features/supervisor/model/supervisor.dart';
+import 'package:ophth_board/features/signatures/view/forms/signature_create_form.dart';
+import 'package:ophth_board/features/signatures/providers/signature_provider.dart';
 
 class AnnualLeaveRequestForm extends ConsumerStatefulWidget {
   const AnnualLeaveRequestForm({super.key});
@@ -25,11 +27,13 @@ class _AnnualLeaveRequestFormState
   bool _isSubmitting = false;
   Supervisor? _selectedSupervisor;
   List<Supervisor>? _supervisors;
+  String? _residentSignatureId; // Add signature tracking
 
   @override
   void initState() {
     super.initState();
     _loadSupervisors();
+    _loadExistingSignature();
   }
 
   @override
@@ -54,6 +58,20 @@ class _AnnualLeaveRequestFormState
           const SnackBar(content: Text('Failed to load supervisors')),
         );
       }
+    }
+  }
+
+  Future<void> _loadExistingSignature() async {
+    try {
+      final userSignature = await ref.read(userSignatureProvider.future);
+      if (userSignature != null && mounted) {
+        setState(() {
+          _residentSignatureId = userSignature.id;
+        });
+      }
+    } catch (e) {
+      // No existing signature or error loading, user will need to create one
+      print('No existing signature found: $e');
     }
   }
 
@@ -323,30 +341,113 @@ class _AnnualLeaveRequestFormState
                       ),
                     ),
 
+                    const SizedBox(height: 24),
+
+                    // Signature Section
+                    Text(
+                      'Digital Signature',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Card(
+                      elevation: 1,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: ListTile(
+                        leading: Icon(
+                          _residentSignatureId != null ? Icons.check_circle : Icons.edit,
+                          color: _residentSignatureId != null ? Colors.green : theme.primaryColor,
+                        ),
+                        title: Text(_residentSignatureId != null 
+                            ? 'Your Signature is Ready' 
+                            : 'Add Your Signature'),
+                        subtitle: Text(
+                          _residentSignatureId != null
+                              ? 'Using your default signature'
+                              : 'Required for submission',
+                        ),
+                        trailing: _residentSignatureId != null 
+                            ? TextButton(
+                                onPressed: () async {
+                                  // Navigate to signature form to update
+                                  final signatureId = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const SignatureCreateForm(),
+                                    ),
+                                  );
+                                  if (signatureId != null) {
+                                    setState(() {
+                                      _residentSignatureId = signatureId;
+                                    });
+                                  }
+                                },
+                                child: const Text('Update'),
+                              )
+                            : const Icon(Icons.arrow_forward_ios),
+                        onTap: _residentSignatureId == null ? () async {
+                          // Navigate to signature form
+                          final signatureId = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SignatureCreateForm(),
+                            ),
+                          );
+                          if (signatureId != null) {
+                            setState(() {
+                              _residentSignatureId = signatureId;
+                            });
+                          }
+                        } : null,
+                      ),
+                    ),
+
                     const SizedBox(height: 32),
 
                     // Submit Button
                     SizedBox(
                       width: double.infinity,
                       height: 50,
-                      child: AsyncGenericButton(
-                        text: 'Submit Request',
-                        onPressed: _submitRequest,
-                        enabled: !_isSubmitting,
-                        loadingWidget: const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.primaryColor,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                      ),
+                      child: _residentSignatureId != null
+                          ? AsyncGenericButton(
+                              text: 'Submit Request',
+                              onPressed: _submitRequest,
+                              enabled: !_isSubmitting,
+                              loadingWidget: const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: theme.primaryColor,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                              ),
+                            )
+                          : ElevatedButton(
+                              onPressed: null,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.grey,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                              ),
+                              child: const Text('Add Signature to Submit'),
+                            ),
                     ),
 
                     const SizedBox(height: 16),
@@ -411,6 +512,7 @@ class _AnnualLeaveRequestFormState
       endDate: _endDate!,
       notes: _notesController.text.trim(),
       requestedAt: DateTime.now(),
+      residentSignatureId: _residentSignatureId, // Include signature
     );
 
     final result = await ref

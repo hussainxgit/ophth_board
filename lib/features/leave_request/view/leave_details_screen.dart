@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ophth_board/core/views/widgets/async_loading_button.dart';
 import '../../resident/providers/resident_provider.dart';
+import '../../signatures/providers/signature_provider.dart';
 import '../model/leave_request.dart';
 import '../../pdf/controller/pdf_controller.dart';
 
@@ -20,6 +21,15 @@ class LeaveDetailsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
+
+    // Fetch signatures if available
+    final residentSignature = leaveRequest.residentSignatureId != null
+        ? ref.watch(signatureByIdProvider(leaveRequest.residentSignatureId!))
+        : const AsyncValue.data(null);
+    
+    final supervisorSignature = leaveRequest.supervisorSignatureId != null
+        ? ref.watch(signatureByIdProvider(leaveRequest.supervisorSignatureId!))
+        : const AsyncValue.data(null);
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -253,6 +263,8 @@ class LeaveDetailsScreen extends ConsumerWidget {
                           context,
                           leaveRequest,
                           resident.value!,
+                          residentSignature: residentSignature.value,
+                          supervisorSignature: supervisorSignature.value,
                         );
                       },
                       icon: const Icon(Icons.picture_as_pdf),

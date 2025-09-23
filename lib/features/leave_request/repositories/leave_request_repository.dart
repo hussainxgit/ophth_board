@@ -107,15 +107,24 @@ class LeaveRequestRepository {
     String requestId,
     LeaveStatus newStatus,
     String approverId,
-    String? comments,
-  ) async {
+    String? comments, {
+    String? supervisorSignatureId,
+  }) async {
     print('updating leave status');
     try {
-      await _firestoreService.updateDocument(_collectionPath, requestId, {
+      final updateData = {
         'status': newStatus.name,
         'approverId': approverId,
         'supervisorComments': comments,
-      });
+        'supervisorSignatureId': supervisorSignatureId,
+        'approvedRejectedAt': Timestamp.fromDate(DateTime.now()),
+      };
+
+      await _firestoreService.updateDocument(
+        _collectionPath,
+        requestId,
+        updateData,
+      );
       return Result.success(null);
     } on FirebaseException catch (e) {
       return Result.error(

@@ -171,60 +171,6 @@ class _PostFormState extends ConsumerState<PostForm> {
     );
   }
 
-  Widget _buildAuthorField() {
-    return TextFormField(
-      controller: _authorController,
-      decoration: InputDecoration(
-        labelText: 'Author',
-        hintText: 'Enter author name',
-        border: const OutlineInputBorder(),
-        prefixIcon: const Icon(Icons.person),
-        filled: widget.post == null && _currentUser != null,
-        fillColor: widget.post == null && _currentUser != null
-            ? Colors.grey.shade200
-            : null,
-      ),
-      readOnly: widget.post == null && _currentUser != null,
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'Author is required';
-        }
-        return null;
-      },
-      textInputAction: widget.post == null && _currentUser != null
-          ? TextInputAction
-                .done // Or next if there are fields after
-          : TextInputAction.next,
-    );
-  }
-
-  Widget _buildAuthorIdField() {
-    return TextFormField(
-      controller: _authorIdController,
-      decoration: InputDecoration(
-        labelText: 'Author ID',
-        hintText: 'Enter author ID',
-        border: const OutlineInputBorder(),
-        prefixIcon: const Icon(Icons.badge),
-        filled: widget.post == null && _currentUser != null,
-        fillColor: widget.post == null && _currentUser != null
-            ? Colors.grey.shade200
-            : null,
-      ),
-      readOnly: widget.post == null && _currentUser != null,
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'Author ID is required';
-        }
-        return null;
-      },
-      textInputAction: widget.post == null && _currentUser != null
-          ? TextInputAction
-                .done // Or next if there are fields after
-          : TextInputAction.next,
-    );
-  }
-
   Widget _buildContentField() {
     return TextFormField(
       controller: _contentController,

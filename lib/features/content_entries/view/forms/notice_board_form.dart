@@ -178,25 +178,6 @@ class _NoticeBoardFormState extends ConsumerState<NoticeBoardForm> {
     );
   }
 
-  Widget _buildAuthorField() {
-    return TextFormField(
-      controller: _authorController,
-      decoration: const InputDecoration(
-        labelText: 'Author',
-        hintText: 'Enter author name',
-        border: OutlineInputBorder(),
-        prefixIcon: Icon(Icons.person),
-      ),
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'Author is required';
-        }
-        return null;
-      },
-      textInputAction: TextInputAction.next,
-    );
-  }
-
   Widget _buildContentField() {
     return TextFormField(
       controller: _contentController,

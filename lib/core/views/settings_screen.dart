@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'theme_settings_screen.dart';
+import 'profile_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -21,6 +22,21 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('My Profile'),
+              subtitle: const Text('Edit your profile information'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const ProfileScreen(),
+                  ),
+                );
+              },
+            ),
+          ),
           Card(
             child: ListTile(
               leading: const Icon(Icons.color_lens),

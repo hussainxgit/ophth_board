@@ -6,6 +6,7 @@ import '../../../features/evaluations/view/evaluation_list_screen.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import '../settings_screen.dart';
+import '../profile_screen.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
@@ -62,6 +63,12 @@ class AppDrawer extends ConsumerWidget {
                 const Divider(height: 1, thickness: 1),
                 _buildMenuItem(
                   context,
+                  icon: Icons.person,
+                  title: 'My Profile',
+                  onTap: () => _navigateTo(context, const ProfileScreen()),
+                ),
+                _buildMenuItem(
+                  context,
                   icon: Icons.settings,
                   title: 'Settings',
                   onTap: () => _navigateTo(context, const SettingsScreen()),
@@ -91,45 +98,66 @@ class AppDrawer extends ConsumerWidget {
   }
 
   Widget _buildHeader(BuildContext context, UserCredentials user) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      color: Theme.of(context).primaryColor,
-      child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(8),
+    return GestureDetector(
+      onTap: () => _navigateTo(context, const ProfileScreen()),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(24),
+        color: Theme.of(context).primaryColor,
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.person,
+                      size: 40,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                    size: 16,
+                  ),
+                ],
               ),
-              child: Icon(
-                Icons.person,
-                size: 40,
-                color: Theme.of(context).primaryColor,
+              const SizedBox(height: 16),
+              Text(
+                user.displayName,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              user.displayName,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+              const SizedBox(height: 4),
+              Text(
+                user.role.name,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                  fontSize: 14,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              user.role.name,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                fontSize: 14,
+              const SizedBox(height: 8),
+              Text(
+                'Tap to edit profile',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.6),
+                  fontSize: 12,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

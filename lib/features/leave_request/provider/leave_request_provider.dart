@@ -61,10 +61,17 @@ class LeaveRequestOperationsNotifier extends Notifier<void> {
     required LeaveStatus newStatus,
     required String approverId,
     String? comments,
+    String? supervisorSignatureId,
   }) async {
     return ref
         .read(leaveRequestRepositoryProvider)
-        .updateLeaveRequestStatus(requestId, newStatus, approverId, comments);
+        .updateLeaveRequestStatus(
+          requestId,
+          newStatus,
+          approverId,
+          comments,
+          supervisorSignatureId: supervisorSignatureId,
+        );
   }
 }
 

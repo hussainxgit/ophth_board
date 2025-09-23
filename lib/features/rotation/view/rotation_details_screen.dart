@@ -33,31 +33,32 @@ class RotationDetailsPage extends ConsumerWidget {
         UserRole.supervisor; // Adjust based on your role field
 
     return Scaffold(
-      appBar: isSupervisor ?
-      AppBar(
-        leading: SizedBox.shrink(),
-        actions: [
-            IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () async {
-                // Show the custom bottom sheet with the CreateRotationForm in edit mode
-                await CustomBottomSheet.show(
-                  context: context,
-                  child: CreateRotationForm(
-                    initialRotation: rotation,
-                    onSaved: () {
-                      // Optionally you can trigger a refresh here if needed
-                    },
-                  ),
-                  height: MediaQuery.of(context).size.height * 0.9,
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                );
-              },
-            ),
-        ],
-      ): AppBar(
-        leading: SizedBox.shrink(),
-      ),
+      appBar: isSupervisor
+          ? AppBar(
+              leading: SizedBox.shrink(),
+              actions: [
+                IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: () async {
+                    // Show the custom bottom sheet with the CreateRotationForm in edit mode
+                    await CustomBottomSheet.show(
+                      context: context,
+                      child: CreateRotationForm(
+                        initialRotation: rotation,
+                        onSaved: () {
+                          // Optionally you can trigger a refresh here if needed
+                        },
+                      ),
+                      height: MediaQuery.of(context).size.height * 0.9,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).scaffoldBackgroundColor,
+                    );
+                  },
+                ),
+              ],
+            )
+          : AppBar(leading: SizedBox.shrink()),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -197,6 +198,7 @@ class RotationDetailsPage extends ConsumerWidget {
                                   .map(
                                     (s) => ListTile(
                                       leading: CircleAvatar(
+                                        radius: 24,
                                         backgroundImage:
                                             s.profileImageUrl != null
                                             ? NetworkImage(s.profileImageUrl!)
@@ -251,73 +253,70 @@ class RotationDetailsPage extends ConsumerWidget {
                     ),
                     const SizedBox(height: 20),
 
-                    // Only show evaluations if user is a supervisor
-                    if (isSupervisor)
-                      evaluationsProvider.when(
-                        data: (evaluations) {
-                          final evaluatedResidentIds = evaluations
-                              .map((e) => e.residentId)
-                              .toSet();
-                          return getRotationResidentsDetailsProvider.when(
-                            data: (residents) {
-                              return Column(
-                                children: residents
-                                    .map(
-                                      (resident) => _buildResidentTile(
-                                        context,
-                                        resident.fullName,
-                                        resident.pgy,
-                                        Colors.blue,
-                                        evaluatedResidentIds.contains(
-                                          resident.id,
-                                        ),
-                                        getCurrentUserProvider!.id,
-                                        evaluations.isNotEmpty
-                                            ? evaluations
-                                                  .firstWhere(
-                                                    (evaluation) =>
-                                                        evaluation.residentId ==
-                                                        resident.id,
-                                                  )
-                                                  .id!
-                                            : null,
-                                      ),
-                                    )
-                                    .toList(),
-                              );
-                            },
-                            error: (error, stackTrace) =>
-                                Text(error.toString()),
-                            loading: () => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        },
-                        error: (error, stackTrace) => Text(error.toString()),
-                        loading: () =>
-                            const Center(child: CircularProgressIndicator()),
-                      )
-                    else
-                      // For residents, show simplified resident list without evaluation options
-                      getRotationResidentsDetailsProvider.when(
-                        data: (residents) {
-                          return Column(
-                            children: residents
-                                .map(
-                                  (resident) => _buildSimpleResidentTile(
-                                    context,
-                                    resident.fullName,
-                                    resident.pgy,
-                                    Colors.blue,
-                                  ),
-                                )
-                                .toList(),
-                          );
-                        },
-                        error: (error, stackTrace) => Text(error.toString()),
-                        loading: () =>
-                            const Center(child: CircularProgressIndicator()),
-                      ),
+                    // Show evaluations for supervisors and residents (residents can see their own evaluations)
+                    evaluationsProvider.when(
+                      data: (evaluations) {
+                        final evaluatedResidentIds = evaluations
+                            .map((e) => e.residentId)
+                            .toSet();
+                        return getRotationResidentsDetailsProvider.when(
+                          data: (residents) {
+                            return Column(
+                              children: residents
+                                  .map(
+                                    (resident) => isSupervisor
+                                        ? _buildResidentTile(
+                                            context,
+                                            resident.fullName,
+                                            resident.pgy,
+                                            Colors.blue,
+                                            evaluatedResidentIds.contains(
+                                              resident.id,
+                                            ),
+                                            getCurrentUserProvider!.id,
+                                            evaluations.isNotEmpty &&
+                                                evaluations.any((e) => e.residentId == resident.id)
+                                                ? evaluations
+                                                      .firstWhere(
+                                                        (evaluation) =>
+                                                            evaluation.residentId ==
+                                                            resident.id,
+                                                      )
+                                                      .id!
+                                                : null,
+                                          )
+                                        : _buildResidentTileForResident(
+                                            context,
+                                            resident.fullName,
+                                            resident.pgy,
+                                            Colors.blue,
+                                            resident.id,
+                                            getCurrentUserProvider!.id,
+                                            evaluations.where((e) => e.residentId == resident.id).isNotEmpty
+                                                ? evaluations
+                                                      .firstWhere(
+                                                        (evaluation) =>
+                                                            evaluation.residentId ==
+                                                            resident.id,
+                                                      )
+                                                      .id!
+                                                : null,
+                                          ),
+                                  )
+                                  .toList(),
+                            );
+                          },
+                          error: (error, stackTrace) =>
+                              Text(error.toString()),
+                          loading: () => const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      },
+                      error: (error, stackTrace) => Text(error.toString()),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                    ),
                   ],
                 ),
               ),
@@ -375,7 +374,7 @@ class RotationDetailsPage extends ConsumerWidget {
               : () {
                   CustomBottomSheet.show(
                     context: context,
-                    child: ResidentEvaluationFormView(
+                    child: ResidentEvaluationFormView( 
                       residentName: name,
                       rotationId: rotation.id,
                       supervisorId: supervisorId,
@@ -395,12 +394,18 @@ class RotationDetailsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSimpleResidentTile(
+  Widget _buildResidentTileForResident(
     BuildContext context,
     String name,
     String title,
     Color avatarColor,
+    String residentId,
+    String currentUserId,
+    String? evaluationId,
   ) {
+    // Show evaluation button only if this is the current user's own evaluation
+    final bool isCurrentUserResident = residentId == currentUserId;
+    
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Row(
@@ -426,6 +431,21 @@ class RotationDetailsPage extends ConsumerWidget {
               ],
             ),
           ),
+          // Show evaluation button only for current user resident
+          if (isCurrentUserResident && evaluationId != null)
+            TextButton(
+              onPressed: () {
+                CustomBottomSheet.show(
+                  context: context,
+                  child: EvaluationResultsScreen(
+                    evaluationId: evaluationId,
+                    residentName: name,
+                    residentLevel: 'Ophthalmology Resident - Year $title',
+                  ),
+                );
+              },
+              child: Text('View My Evaluation'),
+            ),
         ],
       ),
     );
