@@ -73,6 +73,15 @@ class LeaveRequestOperationsNotifier extends Notifier<void> {
           supervisorSignatureId: supervisorSignatureId,
         );
   }
+
+  Future<Result<void>> cancelLeaveRequest({
+    required String requestId,
+    required String residentId,
+  }) async {
+    return ref
+        .read(leaveRequestRepositoryProvider)
+        .cancelLeaveRequest(requestId, residentId);
+  }
 }
 
 // All leaves for a resident

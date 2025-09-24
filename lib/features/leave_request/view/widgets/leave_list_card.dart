@@ -9,6 +9,7 @@ class LeaveListCard extends StatelessWidget {
   final VoidCallback? onApprove;
   final void Function(String? comments)? onReject;
   final VoidCallback? onViewDetails;
+  final VoidCallback? onCancel;
 
   const LeaveListCard({
     super.key,
@@ -17,6 +18,7 @@ class LeaveListCard extends StatelessWidget {
     this.onApprove,
     this.onReject,
     this.onViewDetails,
+    this.onCancel,
   });
 
   @override
@@ -43,6 +45,9 @@ class LeaveListCard extends StatelessWidget {
               if (isSupervisor) ...[
                 const SizedBox(height: 16),
                 _buildSupervisorActions(),
+              ] else if (leaveRequest.canBeCancelled() && onCancel != null) ...[
+                const SizedBox(height: 16),
+                _buildResidentActions(),
               ],
             ],
           ),
@@ -97,6 +102,7 @@ class LeaveListCard extends StatelessWidget {
       'pending': Colors.orange,
       'approved': Colors.green,
       'rejected': Colors.red,
+      'cancelled': Colors.grey,
     };
 
     final color = statusColors[leaveRequest.status.name] ?? Colors.grey;
@@ -311,6 +317,23 @@ class LeaveListCard extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildResidentActions() {
+    return Center(
+      child: OutlinedButton.icon(
+        onPressed: onCancel,
+        icon: const Icon(Icons.cancel_outlined, size: 16),
+        label: const Text('Cancel Request'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.red.shade600,
+          side: BorderSide(color: Colors.red.shade300),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
     );
   }
 }

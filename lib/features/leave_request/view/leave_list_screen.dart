@@ -122,6 +122,68 @@ class LeaveListScreen extends ConsumerWidget {
                                 }
                               }
                             : null,
+                        onCancel: currentUser.role == UserRole.resident &&
+                                leaveRequest.canBeCancelled()
+                            ? () async {
+                                if (leaveRequest.id == null) return;
+
+                                // Show confirmation dialog
+                                final shouldCancel = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Cancel Leave Request'),
+                                    content: const Text(
+                                      'Are you sure you want to cancel this leave request? This action cannot be undone.',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(false),
+                                        child: const Text('No'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(true),
+                                        child: const Text('Yes, Cancel'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+
+                                if (shouldCancel == true) {
+                                  final result = await ref
+                                      .read(
+                                        leaveRequestOperationsProvider.notifier,
+                                      )
+                                      .cancelLeaveRequest(
+                                        requestId: leaveRequest.id!,
+                                        residentId: currentUser.id,
+                                      );
+
+                                  if (context.mounted) {
+                                    if (result.isSuccess) {
+                                      // Invalidate resident list to refresh
+                                      ref.invalidate(
+                                        allResidentLeavesProvider(currentUser.id),
+                                      );
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Leave request cancelled'),
+                                        ),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Error: ${result.errorMessage}',
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                }
+                              }
+                            : null,
                         onViewDetails: () {
                           CustomBottomSheet.show(
                             context: context,

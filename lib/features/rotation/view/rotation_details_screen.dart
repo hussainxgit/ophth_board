@@ -254,68 +254,92 @@ class RotationDetailsPage extends ConsumerWidget {
                     const SizedBox(height: 20),
 
                     // Show evaluations for supervisors and residents (residents can see their own evaluations)
-                    evaluationsProvider.when(
-                      data: (evaluations) {
-                        final evaluatedResidentIds = evaluations
-                            .map((e) => e.residentId)
-                            .toSet();
-                        return getRotationResidentsDetailsProvider.when(
-                          data: (residents) {
-                            return Column(
-                              children: residents
-                                  .map(
-                                    (resident) => isSupervisor
-                                        ? _buildResidentTile(
-                                            context,
-                                            resident.fullName,
-                                            resident.pgy,
-                                            Colors.blue,
-                                            evaluatedResidentIds.contains(
-                                              resident.id,
-                                            ),
-                                            getCurrentUserProvider!.id,
-                                            evaluations.isNotEmpty &&
-                                                evaluations.any((e) => e.residentId == resident.id)
-                                                ? evaluations
-                                                      .firstWhere(
-                                                        (evaluation) =>
-                                                            evaluation.residentId ==
-                                                            resident.id,
-                                                      )
-                                                      .id!
-                                                : null,
-                                          )
-                                        : _buildResidentTileForResident(
-                                            context,
-                                            resident.fullName,
-                                            resident.pgy,
-                                            Colors.blue,
-                                            resident.id,
-                                            getCurrentUserProvider!.id,
-                                            evaluations.where((e) => e.residentId == resident.id).isNotEmpty
-                                                ? evaluations
-                                                      .firstWhere(
-                                                        (evaluation) =>
-                                                            evaluation.residentId ==
-                                                            resident.id,
-                                                      )
-                                                      .id!
-                                                : null,
-                                          ),
-                                  )
-                                  .toList(),
-                            );
-                          },
-                          error: (error, stackTrace) =>
-                              Text(error.toString()),
-                          loading: () => const Center(
-                            child: CircularProgressIndicator(),
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final supAsync = ref.watch(
+                          getSupervisorsByIdProvider(
+                            SupervisorIdList(rotation.assignedSupervisors),
                           ),
                         );
+                        
+                        return supAsync.when(
+                          data: (supervisors) {
+                            final currentUserSupervisor = supervisors.isNotEmpty 
+                                ? supervisors.firstWhere(
+                                    (s) => s.id == getCurrentUserProvider?.id,
+                                    orElse: () => supervisors.first,
+                                  )
+                                : null;
+                                
+                            return evaluationsProvider.when(
+                              data: (evaluations) {
+                                final evaluatedResidentIds = evaluations
+                                    .map((e) => e.residentId)
+                                    .toSet();
+                                return getRotationResidentsDetailsProvider.when(
+                                  data: (residents) {
+                                    return Column(
+                                      children: residents
+                                          .map(
+                                            (resident) => isSupervisor
+                                                ? _buildResidentTile(
+                                                    context,
+                                                    resident.fullName,
+                                                    resident.pgy,
+                                                    Colors.blue,
+                                                    evaluatedResidentIds.contains(
+                                                      resident.id,
+                                                    ),
+                                                    getCurrentUserProvider!.id,
+                                                    evaluations.isNotEmpty &&
+                                                        evaluations.any((e) => e.residentId == resident.id)
+                                                        ? evaluations
+                                                              .firstWhere(
+                                                                (evaluation) =>
+                                                                    evaluation.residentId ==
+                                                                    resident.id,
+                                                              )
+                                                              .id!
+                                                        : null,
+                                                    supervisorName: currentUserSupervisor?.fullName,
+                                                  )
+                                                : _buildResidentTileForResident(
+                                                    context,
+                                                    resident.fullName,
+                                                    resident.pgy,
+                                                    Colors.blue,
+                                                    resident.id,
+                                                    getCurrentUserProvider!.id,
+                                                    evaluations.where((e) => e.residentId == resident.id).isNotEmpty
+                                                        ? evaluations
+                                                              .firstWhere(
+                                                                (evaluation) =>
+                                                                    evaluation.residentId ==
+                                                                    resident.id,
+                                                              )
+                                                              .id!
+                                                        : null,
+                                                  ),
+                                          )
+                                          .toList(),
+                                    );
+                                  },
+                                  error: (error, stackTrace) =>
+                                      Text(error.toString()),
+                                  loading: () => const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              },
+                              error: (error, stackTrace) => Text(error.toString()),
+                              loading: () =>
+                                  const Center(child: CircularProgressIndicator()),
+                            );
+                          },
+                          loading: () => const Center(child: CircularProgressIndicator()),
+                          error: (e, st) => Text('Error loading supervisors: $e'),
+                        );
                       },
-                      error: (error, stackTrace) => Text(error.toString()),
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
                     ),
                   ],
                 ),
@@ -338,8 +362,9 @@ class RotationDetailsPage extends ConsumerWidget {
     Color avatarColor,
     bool isEvaluated,
     String supervisorId,
-    String? evaluationId,
-  ) {
+    String? evaluationId, {
+    String? supervisorName,
+  }) {
     return Row(
       children: [
         CircleAvatar(
@@ -381,9 +406,7 @@ class RotationDetailsPage extends ConsumerWidget {
                       residentId: rotation.assignedResidents.isNotEmpty
                           ? rotation.assignedResidents.first
                           : '',
-                      supervisorName: rotation.assignedSupervisors.isNotEmpty
-                          ? rotation.assignedSupervisors.first
-                          : '',
+                      supervisorName: supervisorName ?? 'Unknown Supervisor',
                       rotationName: rotation.title,
                     ),
                   );

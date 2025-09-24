@@ -17,6 +17,8 @@ class AnnualLeavesListCard extends StatelessWidget {
         return Colors.green;
       case LeaveStatus.rejected:
         return Colors.red;
+      case LeaveStatus.cancelled:
+        return Colors.grey;
     }
   }
 

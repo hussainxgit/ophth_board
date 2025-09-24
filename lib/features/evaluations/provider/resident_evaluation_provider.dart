@@ -69,7 +69,16 @@ class ResidentEvaluationNotifier
     } else if (fieldName == 'residentName') {
       updatedEvaluation = updatedEvaluation.copyWith(
         residentName: value as String,
-      );}
+      );
+    } else if (fieldName == 'supervisorName') {
+      updatedEvaluation = updatedEvaluation.copyWith(
+        supervisorName: value as String,
+      );
+    } else if (fieldName == 'rotationTitle') {
+      updatedEvaluation = updatedEvaluation.copyWith(
+        rotationTitle: value as String,
+      );
+    }
 
     // Add more fields as needed
 

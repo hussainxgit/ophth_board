@@ -135,6 +135,32 @@ class LeaveRequestRepository {
     }
   }
 
+  /// Cancels a pending leave request.
+  Future<Result<void>> cancelLeaveRequest(
+    String requestId,
+    String residentId,
+  ) async {
+    try {
+      final updateData = {
+        'status': LeaveStatus.cancelled.name,
+        'approvedRejectedAt': Timestamp.fromDate(DateTime.now()),
+      };
+
+      await _firestoreService.updateDocument(
+        _collectionPath,
+        requestId,
+        updateData,
+      );
+      return Result.success(null);
+    } on FirebaseException catch (e) {
+      return Result.error(
+        'Failed to cancel leave request: ${e.message}',
+      );
+    } catch (e) {
+      return Result.error('An unexpected error occurred: $e');
+    }
+  }
+
   /// Fetches all leave requests for a specific resident.
   Future<List<LeaveRequest>> getAllLeavesForResident(String residentId) async {
     try {

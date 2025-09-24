@@ -336,6 +336,8 @@ class LeaveDetailsScreen extends ConsumerWidget {
         return Colors.green.withValues(alpha: 0.2);
       case LeaveStatus.rejected:
         return Colors.red.withValues(alpha: 0.2);
+      case LeaveStatus.cancelled:
+        return Colors.grey.withValues(alpha: 0.2);
     }
   }
 
@@ -347,6 +349,8 @@ class LeaveDetailsScreen extends ConsumerWidget {
         return Colors.green.shade700;
       case LeaveStatus.rejected:
         return Colors.red.shade700;
+      case LeaveStatus.cancelled:
+        return Colors.grey.shade700;
     }
   }
 

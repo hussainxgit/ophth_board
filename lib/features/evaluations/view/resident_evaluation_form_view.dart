@@ -53,7 +53,7 @@ class _ResidentEvaluationFormViewState
     notifier.updateEvaluationField(widget.rotationId, 'rotationId');
     notifier.updateEvaluationField(widget.supervisorId, 'supervisorId');
     notifier.updateEvaluationField(widget.residentName, 'residentName');
-    notifier.updateEvaluationField(widget.rotationName, 'rotationName');
+    notifier.updateEvaluationField(widget.rotationName, 'rotationTitle');
     notifier.updateEvaluationField(widget.supervisorName, 'supervisorName');
   }
 

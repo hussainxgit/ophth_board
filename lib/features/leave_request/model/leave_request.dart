@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum LeaveStatus { pending, approved, rejected }
+enum LeaveStatus { pending, approved, rejected, cancelled }
 
 extension LeaveStatusExtension on LeaveStatus {
   String toDisplayString() {
@@ -11,6 +11,8 @@ extension LeaveStatusExtension on LeaveStatus {
         return 'Approved';
       case LeaveStatus.rejected:
         return 'Rejected';
+      case LeaveStatus.cancelled:
+        return 'Cancelled';
     }
   }
 }
@@ -106,5 +108,9 @@ class LeaveRequest {
 
   bool isApproved() {
     return status == LeaveStatus.approved;
+  }
+
+  bool canBeCancelled() {
+    return true;
   }
 }
