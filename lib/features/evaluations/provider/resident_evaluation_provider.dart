@@ -22,6 +22,37 @@ class ResidentEvaluationNotifier
     );
   }
 
+  // Create new evaluation with supervisor signature
+  void createNewEvaluationWithSupervisorSignature({
+    required String rotationId,
+    required String supervisorId,
+    required String residentId,
+    required String supervisorName,
+    required String residentName,
+    required String rotationTitle,
+    required String supervisorSignatureId, // Add required signature ID
+    TrainingLevel trainingLevel = TrainingLevel.r1,
+    TrainingType trainingType = TrainingType.residency,
+    String additionalComments = '',
+  }) {
+    state = ResidentEvaluationState(
+      currentEvaluation: ResidentEvaluation.createdBySupervisor(
+        rotationId: rotationId,
+        supervisorId: supervisorId,
+        residentId: residentId,
+        supervisorName: supervisorName,
+        residentName: residentName,
+        rotationTitle: rotationTitle,
+        supervisorSignatureId: supervisorSignatureId,
+        trainingLevel: trainingLevel,
+        trainingType: trainingType,
+        additionalComments: additionalComments,
+      ),
+      isLoading: false,
+      errorMessage: null,
+    );
+  }
+
   Future<void> loadEvaluation(String evaluationId) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
@@ -133,6 +164,30 @@ class ResidentEvaluationNotifier
       state = state.copyWith(errorMessage: e.toString(), isLoading: false);
       return false;
     }
+  }
+
+  // Method to sign evaluation with supervisor signature
+  void signEvaluationBySupervisor(String supervisorSignatureId) {
+    if (state.currentEvaluation == null) return;
+
+    state = state.copyWith(
+      currentEvaluation: state.currentEvaluation!.copyWith(
+        supervisorSignatureId: supervisorSignatureId,
+        supervisorApproveDate: DateTime.now(),
+      ),
+    );
+  }
+
+  // Method to sign evaluation with resident signature
+  void signEvaluationByResident(String residentSignatureId) {
+    if (state.currentEvaluation == null) return;
+
+    state = state.copyWith(
+      currentEvaluation: state.currentEvaluation!.copyWith(
+        residentSignatureId: residentSignatureId,
+        residentSignatureDate: DateTime.now(),
+      ),
+    );
   }
 }
 

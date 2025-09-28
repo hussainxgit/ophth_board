@@ -27,9 +27,9 @@ class ResidentEvaluation {
   // Additional information
   String additionalComments;
   DateTime? evaluationDate;
-  String? residentSignature;
+  String? residentSignatureId;
   DateTime? residentSignatureDate;
-  String? supervisorSignature;
+  String? supervisorSignatureId;
   DateTime? supervisorApproveDate;
   bool isCompleted;
 
@@ -44,9 +44,9 @@ class ResidentEvaluation {
     this.overallCompetence = EvaluationScore.notApplicable,
     this.additionalComments = '',
     this.evaluationDate,
-    this.residentSignature,
+    this.residentSignatureId,
     this.residentSignatureDate,
-    this.supervisorSignature,
+    this.supervisorSignatureId,
     this.supervisorApproveDate,
     this.isCompleted = false,
     required this.supervisorName,
@@ -56,10 +56,11 @@ class ResidentEvaluation {
 
   // Calculate overall competence score
   int getOverallCompetence() {
+    // Warning: Index -1 out of bounds for overall (max: 4)
     if (categories.isEmpty) return 0;
     final averages = categories.map((c) => c.averageScore).toList();
     final result = averages.reduce((a, b) => a + b) / averages.length;
-    return result.round();
+    return result.round() + 1; // Convert to 1-based index
   }
 
   // Check if form is valid for submission
@@ -94,9 +95,9 @@ class ResidentEvaluation {
     'overallCompetence': overallCompetence.value,
     'additionalComments': additionalComments,
     'evaluationDate': evaluationDate?.toIso8601String(),
-    'residentSignature': residentSignature,
+    'residentSignatureId': residentSignatureId,
     'residentSignatureDate': residentSignatureDate?.toIso8601String(),
-    'supervisorSignature': supervisorSignature,
+    'supervisorSignatureId': supervisorSignatureId,
     'supervisorApproveDate': supervisorApproveDate?.toIso8601String(),
     'isCompleted': isCompleted,
     'supervisorName': supervisorName,
@@ -126,11 +127,11 @@ class ResidentEvaluation {
       evaluationDate: json['evaluationDate'] != null
           ? DateTime.parse(json['evaluationDate'])
           : null,
-      residentSignature: json['residentSignature'],
+      residentSignatureId: json['residentSignatureId'],
       residentSignatureDate: json['residentSignatureDate'] != null
           ? DateTime.parse(json['residentSignatureDate'])
           : null,
-      supervisorSignature: json['supervisorSignature'],
+      supervisorSignatureId: json['supervisorSignatureId'],
       supervisorApproveDate: json['supervisorApproveDate'] != null
           ? DateTime.parse(json['supervisorApproveDate'])
           : null,
@@ -160,9 +161,9 @@ class ResidentEvaluation {
     EvaluationScore? overallCompetence,
     String? additionalComments,
     DateTime? evaluationDate,
-    String? residentSignature,
+    String? residentSignatureId,
     DateTime? residentSignatureDate,
-    String? supervisorSignature,
+    String? supervisorSignatureId,
     DateTime? supervisorApproveDate,
     bool? isCompleted,
   }) {
@@ -180,10 +181,10 @@ class ResidentEvaluation {
       overallCompetence: overallCompetence ?? this.overallCompetence,
       additionalComments: additionalComments ?? this.additionalComments,
       evaluationDate: evaluationDate ?? this.evaluationDate,
-      residentSignature: residentSignature ?? this.residentSignature,
+      residentSignatureId: residentSignatureId ?? this.residentSignatureId,
       residentSignatureDate:
           residentSignatureDate ?? this.residentSignatureDate,
-      supervisorSignature: supervisorSignature ?? this.supervisorSignature,
+      supervisorSignatureId: supervisorSignatureId ?? this.supervisorSignatureId,
       supervisorApproveDate:
           supervisorApproveDate ?? this.supervisorApproveDate,
       isCompleted: isCompleted ?? this.isCompleted,
@@ -391,6 +392,38 @@ class ResidentEvaluation {
       supervisorName: '',
       residentName: '',
       rotationTitle: '',
+    );
+  }
+
+  // Factory constructor for supervisor-created evaluations with automatic signature
+  factory ResidentEvaluation.createdBySupervisor({
+    required String rotationId,
+    required String supervisorId,
+    required String residentId,
+    required String supervisorName,
+    required String residentName,
+    required String rotationTitle,
+    required String supervisorSignatureId, // Add required signature ID
+    TrainingLevel trainingLevel = TrainingLevel.r1,
+    TrainingType trainingType = TrainingType.residency,
+    List<EvaluationCategory>? categories,
+    String additionalComments = '',
+  }) {
+    return ResidentEvaluation(
+      rotationId: rotationId,
+      supervisorId: supervisorId,
+      residentId: residentId,
+      supervisorName: supervisorName,
+      residentName: residentName,
+      rotationTitle: rotationTitle,
+      trainingLevel: trainingLevel,
+      trainingType: trainingType,
+      categories: categories,
+      additionalComments: additionalComments,
+      supervisorSignatureId: supervisorSignatureId, // Use signature ID instead of name
+      supervisorApproveDate: DateTime.now(), // Set current date as signature date
+      evaluationDate: DateTime.now(), // Set evaluation creation date
+      isCompleted: false,
     );
   }
 }

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../providers/auth_provider.dart';
 import '../models/user.dart';
+import '../firebase/firebase_service.dart';
 import '../../features/signatures/view/widgets/signature_picker.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -410,12 +413,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     });
 
     try {
-      // TODO: Implement profile update logic
-      // This would typically involve calling an auth service method
-      // to update the user's profile information
+      // Build update payload
+      final authState = ref.read(authProvider);
+      final user = authState.user;
+      if (user == null) throw Exception('User not found');
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
+      final updateData = <String, dynamic>{
+        'firstName': _firstNameController.text.trim(),
+        'lastName': _lastNameController.text.trim(),
+        'phoneNumber': _phoneController.text.trim().isEmpty
+            ? null
+            : _phoneController.text.trim(),
+        'civilId': _civilIdController.text.trim(),
+        'fileNumber': _fileNumberController.text.trim().isEmpty
+            ? null
+            : _fileNumberController.text.trim(),
+        'workingPlace': _workingPlaceController.text.trim().isEmpty
+            ? null
+            : _workingPlaceController.text.trim(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      // Perform Firestore update
+      final firestore = ref.read(firestoreServiceProvider);
+      await firestore.updateDocument('users', user.id, updateData);
+
+  // Refresh auth provider so UI shows updated user data
+  final _ = ref.refresh(authProvider);
 
       if (mounted) {
         setState(() {
@@ -438,7 +462,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error updating profile: $e'),
+            content: Text('Error updating profile: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );

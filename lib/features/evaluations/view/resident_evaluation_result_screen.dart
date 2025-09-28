@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ophth_board/core/views/widgets/async_loading_button.dart';
 import 'package:ophth_board/features/evaluations/model/resident_evaluation/resident_evaluation.dart';
 import 'package:ophth_board/features/pdf/controller/pdf_controller.dart';
+import 'package:ophth_board/features/signatures/providers/signature_provider.dart';
 import '../model/resident_evaluation/evaluation_category.dart';
 import '../provider/resident_evaluation_provider.dart';
 
@@ -313,41 +314,45 @@ class EvaluationResultsScreen extends ConsumerWidget {
   ) {
     final theme = Theme.of(context);
 
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton(
-            onPressed: () => _savePDF(context, evaluation),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              side: BorderSide(color: theme.colorScheme.primary),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+    return Consumer(
+      builder: (context, ref, child) {
+        return Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => _savePDF(context, evaluation, ref),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: BorderSide(color: theme.colorScheme.primary),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text(
+                  'Save PDF',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
             ),
-            child: Text(
-              'Save PDF',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w500,
+            const SizedBox(width: 16),
+            Expanded(
+              child: AsyncGenericButton(
+                text: 'Share Results',
+                onPressed: () async {
+                  _shareResults(context);
+                },
+                icon: const Icon(Icons.share),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
               ),
             ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: AsyncGenericButton(
-            text: 'Share Results',
-            onPressed: () async {
-              _shareResults(context);
-            },
-            icon: const Icon(Icons.share),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 
@@ -391,9 +396,24 @@ class EvaluationResultsScreen extends ConsumerWidget {
     }
   }
 
-  void _savePDF(BuildContext context, ResidentEvaluation evaluation) async {
-    final PdfController pdfController = PdfController();
-    await pdfController.fillAndViewEvaluationForm(context, evaluation);
+  void _savePDF(BuildContext context, ResidentEvaluation evaluation, WidgetRef ref) async {
+    final PdfController pdfController = PdfController();    
+    // Query signature data using signature IDs from the evaluation
+    final supervisorSignature = evaluation.supervisorSignatureId != null 
+        ? await ref.read(signatureByIdProvider(evaluation.supervisorSignatureId!).future)
+        : null;
+        
+    final residentSignature = evaluation.residentSignatureId != null 
+        ? await ref.read(signatureByIdProvider(evaluation.residentSignatureId!).future)
+        : null;
+    
+    // Generate PDF with both evaluation and signature data
+    await pdfController.fillAndViewEvaluationForm(
+      context, 
+      evaluation,
+      residentSignature: residentSignature,
+      supervisorSignature: supervisorSignature,
+    );
   }
 
   void _shareResults(BuildContext context) {

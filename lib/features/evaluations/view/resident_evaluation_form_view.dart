@@ -4,6 +4,7 @@ import 'package:ophth_board/core/views/widgets/async_loading_button.dart';
 import 'package:ophth_board/features/evaluations/model/resident_evaluation/evaluation_category.dart';
 import 'package:ophth_board/features/evaluations/model/resident_evaluation/resident_evaluation_enums.dart';
 import 'package:ophth_board/features/evaluations/provider/resident_evaluation_provider.dart';
+import 'package:ophth_board/features/signatures/providers/signature_provider.dart';
 
 class ResidentEvaluationFormView extends ConsumerStatefulWidget {
   final String rotationId;
@@ -41,20 +42,44 @@ class _ResidentEvaluationFormViewState
   }
 
   void _initializeEvaluation() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(residentEvaluationProvider.notifier).createNewEvaluation();
-      _setInitialValues();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Get supervisor's signature first
+      final supervisorSignature = await ref.read(signatureByUserIdProvider(widget.supervisorId).future);
+      
+      if (supervisorSignature != null) {
+        // Create evaluation with supervisor signature ID
+        ref.read(residentEvaluationProvider.notifier).createNewEvaluationWithSupervisorSignature(
+          rotationId: widget.rotationId,
+          supervisorId: widget.supervisorId,
+          residentId: widget.residentId,
+          supervisorName: widget.supervisorName,
+          residentName: widget.residentName,
+          rotationTitle: widget.rotationName,
+          supervisorSignatureId: supervisorSignature.id,
+        );
+      } else {
+        // If supervisor doesn't have a signature, create evaluation without signature
+        ref.read(residentEvaluationProvider.notifier).createNewEvaluation();
+        // Set the basic fields manually
+        final notifier = ref.read(residentEvaluationProvider.notifier);
+        notifier.updateEvaluationField(widget.residentId, 'residentId');
+        notifier.updateEvaluationField(widget.rotationId, 'rotationId');
+        notifier.updateEvaluationField(widget.supervisorId, 'supervisorId');
+        notifier.updateEvaluationField(widget.residentName, 'residentName');
+        notifier.updateEvaluationField(widget.rotationName, 'rotationTitle');
+        notifier.updateEvaluationField(widget.supervisorName, 'supervisorName');
+        
+        // Show a message that supervisor needs to create a signature
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Note: Supervisor signature not found. Please create a signature first.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
     });
-  }
-
-  void _setInitialValues() {
-    final notifier = ref.read(residentEvaluationProvider.notifier);
-    notifier.updateEvaluationField(widget.residentId, 'residentId');
-    notifier.updateEvaluationField(widget.rotationId, 'rotationId');
-    notifier.updateEvaluationField(widget.supervisorId, 'supervisorId');
-    notifier.updateEvaluationField(widget.residentName, 'residentName');
-    notifier.updateEvaluationField(widget.rotationName, 'rotationTitle');
-    notifier.updateEvaluationField(widget.supervisorName, 'supervisorName');
   }
 
   @override

@@ -31,12 +31,18 @@ class PdfController {
     }
   }
 
-  // Backwards-compatible method for evaluations
+  // Updated method for evaluations with signature data
   Future<void> fillAndViewEvaluationForm(
     BuildContext context,
-    ResidentEvaluation residentEvaluation,
-  ) async {
-    final formData = _buildEvaluationFormData(residentEvaluation);
+    ResidentEvaluation residentEvaluation, {
+    Signature? residentSignature,
+    Signature? supervisorSignature,
+  }) async {
+    final formData = _buildEvaluationFormData(
+      residentEvaluation,
+      residentSignature: residentSignature,
+      supervisorSignature: supervisorSignature,
+    );
     final template = 'assets/pdf_forms/form_template.pdf';
     await _fillAndShow(
       context,
@@ -80,6 +86,17 @@ class PdfController {
     required String filenamePrefix,
   }) async {
     try {
+      print('=== PDF Form Data Debug ===');
+      print('Template: $templateAsset');
+      formData.forEach((key, value) {
+        if (key.contains('signature') && value != null) {
+          print('$key: [SVG DATA - ${value.toString().length} characters]');
+        } else {
+          print('$key: $value');
+        }
+      });
+      print('=== End Form Data Debug ===');
+      
       final outputPath = await _model.fillPdfForm(
         context,
         formData,
@@ -106,9 +123,65 @@ class PdfController {
     }
   }
 
+  /// Debug helper that prints all form field names in the given PDF template.
+  Future<void> printPdfFormFields(
+    BuildContext context, {
+    String templateAsset = 'assets/pdf_forms/form_template.pdf',
+  }) async {
+    try {
+      print('=== Debugging PDF Form Fields ===');
+      final names = await _model.listPdfFormFields(
+        context,
+        templateAsset: templateAsset,
+      );
+      print('PDF form fields in $templateAsset:');
+      for (int i = 0; i < names.length; i++) {
+        print('[$i] ${names[i]}');
+      }
+      if (names.isEmpty) print('(no fields found)');
+      print('=== End PDF Form Fields Debug ===');
+    } catch (e) {
+      print('Error printing PDF form fields: $e');
+    }
+  }
+
+  /// Test method to debug signature field issues
+  Future<void> debugSignatureFields(BuildContext context) async {
+    print('=== Testing Signature Field Debug ===');
+    
+    // Test with evaluation form
+    await printPdfFormFields(context, templateAsset: 'assets/pdf_forms/form_template.pdf');
+    
+    // Test with leave request form  
+    await printPdfFormFields(context, templateAsset: 'assets/pdf_forms/resident_leave_request.pdf');
+    
+    // Test with sample SVG data
+    const testSvgData = '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200"><path d="M50,50 L100,50 L100,100" stroke="#000000" stroke-width="2.0" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    
+    final testFormData = {
+      'resident_signature': testSvgData,
+      'supervisor_signature': testSvgData,
+    };
+    
+    print('Testing with sample signature data...');
+    try {
+      await _model.fillPdfForm(
+        context,
+        testFormData,
+        templateAsset: 'assets/pdf_forms/form_template.pdf',
+      );
+    } catch (e) {
+      print('Error in signature test: $e');
+    }
+    
+    print('=== End Signature Field Debug ===');
+  }
+
   Map<String, dynamic> _buildEvaluationFormData(
-    ResidentEvaluation residentEvaluation,
-  ) {
+    ResidentEvaluation residentEvaluation, {
+    Signature? residentSignature,
+    Signature? supervisorSignature,
+  }) {
     // Flatten evaluation criteria from all categories
     final criteria = residentEvaluation.categories
         .expand((category) => category.criteria)
@@ -134,9 +207,9 @@ class PdfController {
       'trainee_name': residentEvaluation.residentName,
       'supervisor_name': residentEvaluation.supervisorName,
       'additional_comments': residentEvaluation.additionalComments,
-      'trainee_signature': residentEvaluation.residentSignature ?? '',
-      'supervisor_signature': residentEvaluation.supervisorSignature ?? '',
-      'overall': residentEvaluation.getOverallCompetence() - 1,
+      'overall': residentEvaluation.getOverallCompetence(),
+      'resident_signature': residentSignature?.signatureStoragePath,
+      'supervisor_resident': supervisorSignature?.signatureStoragePath, // Use correct field name from PDF
     };
 
     // Map criteria to numbered fields (1 to 35)
@@ -182,8 +255,15 @@ class PdfController {
       if (criteria[i].name == criteriaMapping[i]) {
         final scoreIndex = scoreToIndex[criteria[i].score];
         if (scoreIndex != null) {
-          formData['$i'] = scoreIndex;
+          print(
+            'Assigning ${criteria[i].name} to field ${i + 1} with index $scoreIndex',
+          );
+          formData['${i + 1}'] = scoreIndex;
         }
+      } else {
+        print(
+          'Warning: Criteria name mismatch at index $i. Expected ${criteriaMapping[i]}, found ${criteria[i].name}',
+        );
       }
     }
 
@@ -216,7 +296,8 @@ class PdfController {
     }
 
     if (supervisorSignature != null) {
-      formData['supervisor_signature'] = supervisorSignature.signatureStoragePath;
+      formData['resident_signature'] =
+          supervisorSignature.signatureStoragePath;
     }
 
     return formData;

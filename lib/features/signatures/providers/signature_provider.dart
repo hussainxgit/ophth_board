@@ -144,3 +144,12 @@ final signatureByIdProvider =
   
   return result.isSuccess ? result.data : null;
 });
+
+// Get signature by user ID (for getting any user's signature by their ID)
+final signatureByUserIdProvider =
+    FutureProvider.family<Signature?, String>((ref, userId) async {
+  final repository = ref.watch(signatureRepositoryProvider);
+  final result = await repository.getUserSignature(userId);
+  
+  return result.isSuccess ? result.data : null;
+});
