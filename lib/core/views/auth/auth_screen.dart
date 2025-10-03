@@ -215,26 +215,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 24),
-
-                  // Demo credentials info
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Demo Credentials:'),
-                        const SizedBox(height: 8),
-                        Text('Supervisor: aseel@gmail.com / 123456'),
-                        Text('Resident: robinx5.q8@gmail.com / 123456'),
-                      ],
-                    ),
-                  ),
-
                   const SizedBox(height: 48),
 
                   // Create Account
