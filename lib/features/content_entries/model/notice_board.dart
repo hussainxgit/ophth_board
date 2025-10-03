@@ -3,6 +3,7 @@ import 'package:ophth_board/features/content_entries/model/content_entry.dart';
 
 class NoticeBoard extends ContentEntry {
   List<CommentData> comments;
+  @override
   List<String> tags;
   NoticeBoard({
     required super.id,
@@ -17,6 +18,7 @@ class NoticeBoard extends ContentEntry {
   }) : super(
          updatedAt: updatedAt ?? DateTime.now(),
          type: ContentType.noticeBoard,
+         authorId: author, // Pass author as authorId, or adjust as needed
        );
 
   /// Factory constructor to create a NoticeBoard instance from a map.

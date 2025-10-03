@@ -45,13 +45,19 @@ class CommentRepository {
 
       // Find and update the comment
       final commentIndex = comments.indexWhere(
-        (comment) => comment['dateTime'] == updatedComment.dateTime,
+        (comment) => comment['id'] == updatedComment.id,
       );
       if (commentIndex == -1) {
         return Result.error('Comment not found');
       }
 
-      comments[commentIndex] = updatedComment.toMap();
+      // Update the comment with edit timestamp
+      final editedComment = updatedComment.copyWith(
+        editedAt: DateTime.now().toIso8601String(),
+        isEdited: true,
+      );
+      
+      comments[commentIndex] = editedComment.toMap();
 
       await _firestoreService.updateDocument(collectionName, documentId, {
         'comments': comments,

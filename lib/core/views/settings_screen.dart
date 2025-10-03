@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'theme_settings_screen.dart';
 import 'profile_screen.dart';
+import 'help_support_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -47,6 +48,21 @@ class SettingsScreen extends StatelessWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => const ThemeSettingsScreen(),
+                  ),
+                );
+              },
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.help),
+              title: const Text('Help & Support'),
+              subtitle: const Text('Get help and contact support'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const HelpSupportScreen(),
                   ),
                 );
               },

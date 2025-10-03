@@ -70,7 +70,7 @@ class SupervisorProfileScreen extends ConsumerWidget {
             SupervisorProfileListHeader(
               icon: Icons.airplane_ticket_outlined,
               title: 'Residents leaves requests',
-              buttonLabel: 'View all',
+              buttonLabel: '',
               onTap: () {},
             ),
             supervisorLeaveRequestList.when(

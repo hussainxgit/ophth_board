@@ -3,7 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'content_entry.dart';
 
 class Post extends ContentEntry {
+  @override
   final String authorId;
+  @override
   final List<String> tags;
 
   Post({
@@ -18,6 +20,7 @@ class Post extends ContentEntry {
     this.tags = const [],
   }) : super(
          type: ContentType.post,
+         authorId: author, // Pass author as authorId, or adjust as needed
        );
 
   @override

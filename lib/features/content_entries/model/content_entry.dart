@@ -5,6 +5,9 @@ enum ContentStatus { draft, published, archived, pendingReview }
 /// You can expand this enum as you add more content types.
 enum ContentType { announcement, noticeBoard, post }
 
+/// Enum to represent the priority level of a content entry.
+enum ContentPriority { low, normal, high, urgent }
+
 /// Abstract class representing a generic content entry.
 /// This class cannot be instantiated directly but serves as a base for specific content types.
 abstract class ContentEntry {
@@ -18,7 +21,10 @@ abstract class ContentEntry {
   String content;
 
   /// The author or creator of the content.
-  String author; // Or potentially a User object: final User author;
+  String author;
+  
+  /// The unique identifier of the author.
+  final String authorId;
 
   /// The date and time when the content entry was created.
   final DateTime createdAt;
@@ -32,6 +38,24 @@ abstract class ContentEntry {
   /// The specific type of content (e.g., news, event).
   final ContentType type;
 
+  /// The priority level of the content entry.
+  ContentPriority priority;
+
+  /// List of tags associated with the content entry.
+  List<String> tags;
+
+  /// Number of views this content has received.
+  int viewCount;
+
+  /// Number of likes this content has received.
+  int likeCount;
+
+  /// List of user IDs who liked this content.
+  List<String> likedBy;
+
+  /// Whether comments are enabled for this content.
+  bool commentsEnabled;
+
   /// Constructor for the ContentEntry.
   /// [id], [createdAt], and [type] are typically set once upon creation.
   /// [title], [content], [author], [updatedAt], and [status] can be modified.
@@ -40,10 +64,17 @@ abstract class ContentEntry {
     required this.title,
     required this.content,
     required this.author,
+    required this.authorId,
     required this.createdAt,
     required this.updatedAt,
     required this.status,
     required this.type,
+    this.priority = ContentPriority.normal,
+    this.tags = const [],
+    this.viewCount = 0,
+    this.likeCount = 0,
+    this.likedBy = const [],
+    this.commentsEnabled = true,
   });
 
   // --- Common Methods ---
@@ -98,8 +129,102 @@ abstract class ContentEntry {
     print('Content entry "$title" has been updated.');
   }
 
+  /// Increment the view count.
+  void incrementViewCount() {
+    viewCount++;
+  }
+
+  /// Toggle like status for a user.
+  bool toggleLike(String userId) {
+    if (likedBy.contains(userId)) {
+      likedBy.remove(userId);
+      likeCount = likedBy.length;
+      return false; // Unliked
+    } else {
+      likedBy.add(userId);
+      likeCount = likedBy.length;
+      return true; // Liked
+    }
+  }
+
+  /// Check if a user has liked this content.
+  bool isLikedBy(String userId) {
+    return likedBy.contains(userId);
+  }
+
+  /// Add a tag to the content entry.
+  void addTag(String tag) {
+    if (!tags.contains(tag)) {
+      tags.add(tag);
+      updatedAt = DateTime.now();
+    }
+  }
+
+  /// Remove a tag from the content entry.
+  void removeTag(String tag) {
+    if (tags.remove(tag)) {
+      updatedAt = DateTime.now();
+    }
+  }
+
+  /// Check if the current user can edit this content.
+  bool canEdit(String currentUserId) {
+    return authorId == currentUserId;
+  }
+
+  /// Check if the current user can delete this content.
+  bool canDelete(String currentUserId) {
+    return authorId == currentUserId;
+  }
+
+  /// Get the time elapsed since creation in a human-readable format.
+  String getTimeAgo() {
+    final now = DateTime.now();
+    final difference = now.difference(createdAt);
+
+    if (difference.inDays > 7) {
+      return '${createdAt.day}/${createdAt.month}/${createdAt.year}';
+    } else if (difference.inDays > 0) {
+      return '${difference.inDays} day${difference.inDays == 1 ? '' : 's'} ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours} hour${difference.inHours == 1 ? '' : 's'} ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes} minute${difference.inMinutes == 1 ? '' : 's'} ago';
+    } else {
+      return 'Just now';
+    }
+  }
+
+  /// Get the status display text.
+  String getStatusDisplayText() {
+    switch (status) {
+      case ContentStatus.draft:
+        return 'Draft';
+      case ContentStatus.published:
+        return 'Published';
+      case ContentStatus.archived:
+        return 'Archived';
+      case ContentStatus.pendingReview:
+        return 'Pending Review';
+    }
+  }
+
+  /// Get the priority display text.
+  String getPriorityDisplayText() {
+    switch (priority) {
+      case ContentPriority.low:
+        return 'Low';
+      case ContentPriority.normal:
+        return 'Normal';
+      case ContentPriority.high:
+        return 'High';
+      case ContentPriority.urgent:
+        return 'Urgent';
+    }
+  }
+
   // You could add more common methods here, like:
   // void delete();
-  // void addTag(String tag);
-  // void removeTag(String tag);
+  // bool canComment(String userId);
+  // void setCommentEnabled(bool enabled);
 }

@@ -55,7 +55,10 @@ class CommentNotifier extends StateNotifier<AsyncValue<List<CommentData>>> {
     if (result.isSuccess) {
       state.whenData((currentComments) {
         final updatedComments = currentComments.map((comment) {
-          return comment.dateTime == updatedComment.dateTime ? updatedComment : comment;
+          return comment.id == updatedComment.id ? updatedComment.copyWith(
+            editedAt: DateTime.now().toIso8601String(),
+            isEdited: true,
+          ) : comment;
         }).toList();
         state = AsyncValue.data(updatedComments);
       });
@@ -64,17 +67,17 @@ class CommentNotifier extends StateNotifier<AsyncValue<List<CommentData>>> {
     return result;
   }
 
-  Future<Result<void>> deleteComment(String dateTime) async {
+  Future<Result<void>> deleteComment(String commentId) async {
     final result = await _repository.deleteComment(
       collectionName,
       documentId,
-      dateTime,
+      commentId,
     );
 
     if (result.isSuccess) {
       state.whenData((currentComments) {
         final updatedComments = currentComments
-            .where((comment) => comment.dateTime != dateTime)
+            .where((comment) => comment.id != commentId)
             .toList();
         state = AsyncValue.data(updatedComments);
       });

@@ -155,7 +155,7 @@ class _ContentEntryListScreenState
         ContentListHeader(
           icon: icon,
           title: title,
-          buttonLabel: 'View All',
+          buttonLabel: '',
           onTap: onViewAll,
         ),
         ...displayItems.map(
@@ -182,7 +182,7 @@ class _ContentEntryListScreenState
         ContentListHeader(
           icon: icon,
           title: title,
-          buttonLabel: 'View All',
+          buttonLabel: '',
           onTap: () => _navigateToViewAll(_getContentTypeFromTitle(title)),
         ),
         SizedBox(
@@ -209,7 +209,7 @@ class _ContentEntryListScreenState
         ContentListHeader(
           icon: icon,
           title: title,
-          buttonLabel: 'View All',
+          buttonLabel: '',
           onTap: () {},
         ),
         SizedBox(
@@ -232,7 +232,7 @@ class _ContentEntryListScreenState
         ContentListHeader(
           icon: icon,
           title: title,
-          buttonLabel: 'View All',
+          buttonLabel: '',
           onTap: () {},
         ),
         SizedBox(
@@ -285,6 +285,6 @@ class _ContentEntryListScreenState
     }
 
     // Temporary debug print
-    print('Navigate to $contentType view all');
+    print('Navigate to $contentType ');
   }
 }

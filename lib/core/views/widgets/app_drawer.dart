@@ -7,6 +7,7 @@ import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import '../settings_screen.dart';
 import '../profile_screen.dart';
+import '../help_support_screen.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
@@ -77,7 +78,7 @@ class AppDrawer extends ConsumerWidget {
                   context,
                   icon: Icons.help,
                   title: 'Help & Support',
-                  onTap: () => Navigator.pop(context),
+                  onTap: () => _navigateTo(context, const HelpSupportScreen()),
                 ),
                 const Divider(height: 1, thickness: 1),
                 _buildMenuItem(

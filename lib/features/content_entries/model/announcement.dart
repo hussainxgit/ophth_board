@@ -18,8 +18,9 @@ class Announcement extends ContentEntry {
     required super.status,
     // this.isUrgent = false, // Example of an Announcement-specific field
   }) : super(
-          type: ContentType.announcement, // Ensures type is always announcement
-        );
+         type: ContentType.announcement, // Ensures type is always announcement
+         authorId: author, // Pass author as authorId, or adjust as needed
+       );
 
   @override
   void displaySummary() {
@@ -49,7 +50,7 @@ class Announcement extends ContentEntry {
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
       'status': status.name, // Store enum as its string name
-      'type': type.name,     // Store enum as its string name
+      'type': type.name, // Store enum as its string name
       // 'isUrgent': isUrgent, // Example
     };
   }
@@ -66,7 +67,8 @@ class Announcement extends ContentEntry {
       updatedAt: (map['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       status: ContentStatus.values.firstWhere(
         (e) => e.name == map['status'],
-        orElse: () => ContentStatus.draft, // Default if status is missing or invalid
+        orElse: () =>
+            ContentStatus.draft, // Default if status is missing or invalid
       ),
       // isUrgent: map['isUrgent'] as bool? ?? false, // Example
       // Note: 'type' from the map is ignored here; constructor sets it.
