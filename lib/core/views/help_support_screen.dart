@@ -126,21 +126,21 @@ class HelpSupportScreen extends StatelessWidget {
     );
   }
 
-  void _launchEmail() async {
-    final Uri emailUri = Uri(
-      scheme: 'mailto',
-      path: 'support@ophthboard.com',
-      query: 'subject=Support Request - Ophth Board App',
-    );
+  // void _launchEmail() async {
+  //   final Uri emailUri = Uri(
+  //     scheme: 'mailto',
+  //     path: 'support@ophthboard.com',
+  //     query: 'subject=Support Request - Ophth Board App',
+  //   );
 
-    try {
-      if (await canLaunchUrl(emailUri)) {
-        await launchUrl(emailUri);
-      }
-    } catch (e) {
-      // Handle error silently or show a snackbar
-    }
-  }
+  //   try {
+  //     if (await canLaunchUrl(emailUri)) {
+  //       await launchUrl(emailUri);
+  //     }
+  //   } catch (e) {
+  //     // Handle error silently or show a snackbar
+  //   }
+  // }
 
   void _launchPhone() async {
     final Uri phoneUri = Uri(scheme: 'tel', path: '+96562228494');
@@ -157,8 +157,8 @@ class HelpSupportScreen extends StatelessWidget {
   void _showAboutDialog(BuildContext context) {
     showAboutDialog(
       context: context,
-      applicationName: 'Ophth Board',
-      applicationVersion: '1.0.0',
+      applicationName: 'Kuwait Ophthalmology Board',
+      applicationVersion: '0.7.0',
       applicationIcon: const Icon(
         Icons.medical_services,
         size: 48,

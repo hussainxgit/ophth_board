@@ -1,7 +1,7 @@
 name: ophth_board
-description: "A new Flutter project."
+description: "An a management App for Kuwaiti Ophthalmology board"
 publish_to: 'none'
-version: 0.1.0
+version: 1.0.0+1
 
 environment:
   sdk: ^3.9.0-100.2.beta
